@@ -1,0 +1,34 @@
+# # File gsaved with Nlview version 6.3.8  2013-12-19 bk=1.2992 VDI=34 GEI=35
+# 
+preplace inst pll.pll_0 -pg 1 -lvl 2 -y 170
+preplace inst pll.pll_1 -pg 1 -lvl 3 -y 170
+preplace inst pll.pll_2 -pg 1 -lvl 2 -y 370
+preplace inst pll.clk_0 -pg 1 -lvl 1 -y 260
+preplace inst pll -pg 1 -lvl 1 -y 40 -regy -20
+preplace netloc EXPORT<net_container>pll</net_container>(MASTER)pll.pll_2_outclk3,(MASTER)pll_2.outclk3) 1 2 2 NJ 440 NJ
+preplace netloc EXPORT<net_container>pll</net_container>(MASTER)pll.pll_0_outclk4,(MASTER)pll_0.outclk4) 1 2 2 NJ 120 NJ
+preplace netloc EXPORT<net_container>pll</net_container>(SLAVE)pll.pll_2_refclk,(SLAVE)pll_2.refclk) 1 0 2 NJ 400 NJ
+preplace netloc EXPORT<net_container>pll</net_container>(SLAVE)pll_1.reset,(SLAVE)pll.pll_1_reset) 1 0 3 NJ 250 NJ 360 NJ
+preplace netloc EXPORT<net_container>pll</net_container>(MASTER)pll_0.outclk2,(MASTER)pll.pll_0_outclk2) 1 2 2 NJ 80 NJ
+preplace netloc EXPORT<net_container>pll</net_container>(MASTER)pll.pll_2_outclk2,(MASTER)pll_2.outclk2) 1 2 2 NJ 420 NJ
+preplace netloc EXPORT<net_container>pll</net_container>(MASTER)pll_0.outclk6,(MASTER)pll.pll_0_outclk6) 1 2 2 NJ 160 NJ
+preplace netloc EXPORT<net_container>pll</net_container>(MASTER)pll_0.outclk5,(MASTER)pll.pll_0_outclk5) 1 2 2 NJ 140 NJ
+preplace netloc EXPORT<net_container>pll</net_container>(SLAVE)pll_1.refclk,(SLAVE)pll.pll_1_refclk) 1 0 3 NJ 160 NJ 160 NJ
+preplace netloc EXPORT<net_container>pll</net_container>(MASTER)pll_1.outclk1,(MASTER)pll.pll_1_outclk1) 1 3 1 NJ
+preplace netloc EXPORT<net_container>pll</net_container>(SLAVE)clk_0.clk_in,(SLAVE)pll.clk) 1 0 1 NJ
+preplace netloc EXPORT<net_container>pll</net_container>(MASTER)pll_2.outclk1,(MASTER)pll.pll_2_outclk1) 1 2 2 NJ 400 NJ
+preplace netloc EXPORT<net_container>pll</net_container>(MASTER)pll.pll_1_outclk2,(MASTER)pll_1.outclk2) 1 3 1 NJ
+preplace netloc EXPORT<net_container>pll</net_container>(MASTER)pll.pll_0_outclk3,(MASTER)pll_0.outclk3) 1 2 2 NJ 100 NJ
+preplace netloc EXPORT<net_container>pll</net_container>(MASTER)pll_1.outclk3,(MASTER)pll.pll_1_outclk3) 1 3 1 NJ
+preplace netloc EXPORT<net_container>pll</net_container>(SLAVE)pll.reset,(SLAVE)clk_0.clk_in_reset) 1 0 1 NJ
+preplace netloc EXPORT<net_container>pll</net_container>(MASTER)pll_2.outclk4,(MASTER)pll.pll_2_outclk4) 1 2 2 NJ 460 NJ
+preplace netloc EXPORT<net_container>pll</net_container>(MASTER)pll.pll_0_outclk1,(MASTER)pll_0.outclk1) 1 2 2 NJ 60 NJ
+preplace netloc EXPORT<net_container>pll</net_container>(MASTER)pll_0.outclk0,(MASTER)pll.pll_0_outclk0) 1 2 2 NJ 40 NJ
+preplace netloc EXPORT<net_container>pll</net_container>(MASTER)pll_1.outclk4,(MASTER)pll.pll_1_outclk4) 1 3 1 NJ
+preplace netloc EXPORT<net_container>pll</net_container>(MASTER)pll_2.outclk0,(MASTER)pll.pll_2_outclk0) 1 2 2 NJ 380 NJ
+preplace netloc EXPORT<net_container>pll</net_container>(SLAVE)pll_0.refclk,(SLAVE)pll.pll_0_refclk) 1 0 2 NJ 210 NJ
+preplace netloc EXPORT<net_container>pll</net_container>(SLAVE)pll.pll_2_reset,(SLAVE)pll_2.reset) 1 0 2 NJ 420 NJ
+preplace netloc EXPORT<net_container>pll</net_container>(MASTER)pll_1.outclk0,(MASTER)pll.pll_1_outclk0) 1 3 1 NJ
+preplace netloc EXPORT<net_container>pll</net_container>(SLAVE)pll.pll_0_reset,(SLAVE)pll_0.reset) 1 0 2 NJ 230 NJ
+levelinfo -pg 1 0 90 970
+levelinfo -hier pll 100 130 370 730 860

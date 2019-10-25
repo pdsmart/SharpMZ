@@ -1,0 +1,54 @@
+Info: Starting: Create block symbol file (.bsf)
+Info: qsys-generate /srv/dvlp/Projects/dev/github/em/common/pll.qsys --block-symbol-file --output-directory=/srv/dvlp/Projects/dev/github/em/common/pll --family="Cyclone V" --part=5CSEBA6U23I7
+Progress: Loading common/pll.qsys
+Progress: Reading input file
+Progress: Adding clk_0 [clock_source 17.1]
+Progress: Parameterizing module clk_0
+Progress: Adding pll_0 [altera_pll 17.1]
+Progress: Parameterizing module pll_0
+Progress: Adding pll_1 [altera_pll 17.1]
+Progress: Parameterizing module pll_1
+Progress: Adding pll_2 [altera_pll 17.1]
+Progress: Parameterizing module pll_2
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Info: pll.pll_0: The legal reference clock frequency is 50.0 MHz..700.0 MHz
+Warning: pll.pll_0: Able to implement PLL - Actual settings differ from Requested settings
+Info: pll.pll_1: The legal reference clock frequency is 5.0 MHz..700.0 MHz
+Warning: pll.pll_1: Able to implement PLL - Actual settings differ from Requested settings
+Info: pll.pll_2: The legal reference clock frequency is 50.0 MHz..700.0 MHz
+Warning: pll.pll_2: Able to implement PLL - Actual settings differ from Requested settings
+Info: qsys-generate succeeded.
+Info: Finished: Create block symbol file (.bsf)
+Info: 
+Info: Starting: Create HDL design files for synthesis
+Info: qsys-generate /srv/dvlp/Projects/dev/github/em/common/pll.qsys --synthesis=VHDL --output-directory=/srv/dvlp/Projects/dev/github/em/common/pll/synthesis --family="Cyclone V" --part=5CSEBA6U23I7
+Progress: Loading common/pll.qsys
+Progress: Reading input file
+Progress: Adding clk_0 [clock_source 17.1]
+Progress: Parameterizing module clk_0
+Progress: Adding pll_0 [altera_pll 17.1]
+Progress: Parameterizing module pll_0
+Progress: Adding pll_1 [altera_pll 17.1]
+Progress: Parameterizing module pll_1
+Progress: Adding pll_2 [altera_pll 17.1]
+Progress: Parameterizing module pll_2
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Info: pll.pll_0: The legal reference clock frequency is 50.0 MHz..700.0 MHz
+Warning: pll.pll_0: Able to implement PLL - Actual settings differ from Requested settings
+Info: pll.pll_1: The legal reference clock frequency is 5.0 MHz..700.0 MHz
+Warning: pll.pll_1: Able to implement PLL - Actual settings differ from Requested settings
+Info: pll.pll_2: The legal reference clock frequency is 50.0 MHz..700.0 MHz
+Warning: pll.pll_2: Able to implement PLL - Actual settings differ from Requested settings
+Info: pll: Generating pll "pll" for QUARTUS_SYNTH
+Info: pll_0: "pll" instantiated altera_pll "pll_0"
+Info: pll_1: "pll" instantiated altera_pll "pll_1"
+Info: pll_2: "pll" instantiated altera_pll "pll_2"
+Info: pll: Done "pll" with 4 modules, 7 files
+Info: qsys-generate succeeded.
+Info: Finished: Create HDL design files for synthesis
