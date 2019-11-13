@@ -1,5 +1,8 @@
 # Sharp MZ Series Personal and Business Computer Emulation
+
 Written by Philip Smart, 2018 for the Terasic DE10 Nano board under the MiSTer framework.
+
+Please consult my [GitHub](https://pdsmart.github.io) website for more upto date information.
 
 This project aims to provide full emulation (along with extensions) of the Sharp MZ Series Computers.
 
