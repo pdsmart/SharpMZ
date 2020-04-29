@@ -174,146 +174,146 @@ component sharpmz
     );
 end component;
 
-component STORM_SoC
-    port (
-        -- Global Control --
-        CLK_I                 : in    std_logic;
-        RST_I                 : in    std_logic;
-
-        -- General purpose (debug) UART --
-        UART0_RXD_I           : in    std_logic;
-        UART0_TXD_O           : out   std_logic;
-
-        -- System Control --
-        START_I               : in    std_logic; -- low active
-        BOOT_CONFIG_I         : in    std_logic_vector(03 downto 0); -- low active
-        LED_BAR_O             : out   std_logic_vector(07 downto 0);
-
-        -- GP Input Pins --
-        GP_INPUT_I            : in    std_logic_vector(07 downto 0);
-
-        -- GP Output Pins --
-        GP_OUTPUT_O           : out   std_logic_vector(07 downto 0);
-
-        -- I²C Port --
-        I2C_SCL_IO            : inout std_logic;
-        I2C_SDA_IO            : inout std_logic;
-
-        -- SPI Port 0 [3 devices] --
-        SPI_P0_CLK_O          : out   std_logic;
-        SPI_P0_MISO_I         : in    std_logic;
-        SPI_P0_MOSI_O         : out   std_logic;
-        SPI_P0_CS_O           : out   std_logic_vector(02 downto 0);
-
-        -- SPI Port 1 [3 devices] --
-        SPI_P1_CLK_O          : out   std_logic;
-        SPI_P1_MISO_I         : in    std_logic;
-        SPI_P1_MOSI_O         : out   std_logic;
-        SPI_P1_CS_O           : out   std_logic_vector(02 downto 0);
-
-        -- SPI Port 2 [2 devices] --
-        SPI_P2_CLK_O          : out   std_logic;
-        SPI_P2_MISO_I         : in    std_logic;
-        SPI_P2_MOSI_O         : out   std_logic;
-        SPI_P2_CS_O           : out   std_logic_vector(01 downto 0);
-
-        -- PWM Port 0 --
---      PWM0_PORT_O           : out   std_logic_vector(07 downto 0)
-
-        -- IOCTL Bus --
-        IOCTL_DOWNLOAD        : out   std_logic;                                  -- Downloading to FPGA.
-        IOCTL_UPLOAD          : out   std_logic;                                  -- Uploading from FPGA.
-        IOCTL_CLK             : out   std_logic;                                  -- I/O Clock.
-        IOCTL_WR              : out   std_logic;                                  -- Write Enable to FPGA.
-        IOCTL_RD              : out   std_logic;                                  -- Read Enable from FPGA.
-        IOCTL_SENSE           : in    std_logic;                                  -- Sense to see if HPS accessing ioctl bus.
-        IOCTL_SELECT          : out   std_logic;                                  -- Enable IOP control over ioctl bus.
-        IOCTL_ADDR            : out   std_logic_vector(24 downto 0);              -- Address in FPGA to write into.
-        IOCTL_DOUT            : out   std_logic_vector(31 downto 0);              -- Data to be written into FPGA.
-        IOCTL_DIN             : in    std_logic_vector(31 downto 0)               -- Data to be read into HPS.
-
---      -- SDRAM Interface --
---      SDRAM_CLK_O           : out   std_logic;
---      SDRAM_CSN_O           : out   std_logic;
---      SDRAM_CKE_O           : out   std_logic;
---      SDRAM_RASN_O          : out   std_logic;
---      SDRAM_CASN_O          : out   std_logic;
---      SDRAM_WEN_O           : out   std_logic;
---      SDRAM_DQM_O           : out   std_logic_vector(01 downto 0);
---      SDRAM_BA_O            : out   std_logic_vector(01 downto 0);
---      SDRAM_ADR_O           : out   std_logic_vector(11 downto 0);
---      SDRAM_DAT_IO          : inout std_logic_vector(15 downto 0)
-    );
-end component;
-
-component neo430
-    generic (
-        -- general configuration --
-        CLOCK_SPEED           : natural := 100000000; -- main clock in Hz
-        IMEM_SIZE             : natural := 4*1024; -- internal IMEM size in bytes, max 48kB (default=4kB)
-        DMEM_SIZE             : natural := 2*1024; -- internal DMEM size in bytes, max 12kB (default=2kB)
-        -- additional configuration --
-        USER_CODE             : std_logic_vector(15 downto 0) := x"0000"; -- custom user code
-        -- module configuration --
-        DADD_USE              : boolean := true; -- implement DADD instruction? (default=true)
-        MULDIV_USE            : boolean := true; -- implement multiplier/divider unit? (default=true)
-        WB32_USE              : boolean := false;-- implement WB32 unit? (default=true)
-        WDT_USE               : boolean := true; -- implement WDT? (default=true)
-        GPIO_USE              : boolean := true; -- implement GPIO unit? (default=true)
-        TIMER_USE             : boolean := true; -- implement timer? (default=true)
-        UART_USE              : boolean := true; -- implement UART? (default=true)
-        CRC_USE               : boolean := true; -- implement CRC unit? (default=true)
-        CFU_USE               : boolean := true; -- implement custom functions unit? (default=false)
-        PWM_USE               : boolean := true; -- implement PWM controller?
-        TWI_USE               : boolean := true; -- implement two wire serial interface? (default=true)
-        SPI_USE               : boolean := true; -- implement SPI? (default=true)
-        -- boot configuration --
-        BOOTLD_USE            : boolean := true; -- implement and use bootloader? (default=true)
-        IMEM_AS_ROM           : boolean := false -- implement IMEM as read-only memory? (default=false)
-   );
-    port (
-        -- global control --
-        clk_i                 : in    std_logic; -- global clock, rising edge
-        rst_i                 : in    std_logic; -- global reset, async, low-active
-        -- gpio --
-        gpio_o                : out   std_logic_vector(15 downto 0); -- parallel output
-        gpio_i                : in    std_logic_vector(15 downto 0); -- parallel input
-        -- pwm channels --
-        pwm_o                 : out   std_logic_vector(02 downto 0); -- pwm channels
-        -- serial com --
-        uart_txd_o            : out   std_logic; -- UART send data
-        uart_rxd_i            : in    std_logic; -- UART receive data
-        spi_sclk_o            : out   std_logic; -- serial clock line
-        spi_mosi_o            : out   std_logic; -- serial data line out
-        spi_miso_i            : in    std_logic; -- serial data line in
-        spi_cs_o              : out   std_logic_vector(07 downto 0); -- SPI CS 0..7
-        twi_sda_io            : inout std_logic; -- twi serial data line
-        twi_scl_io            : inout std_logic; -- twi serial clock line
-        -- IOCTL Bus --
-        ioctl_download        : out   std_logic;                                  -- Downloading to FPGA.
-        ioctl_upload          : out   std_logic;                                  -- Uploading from FPGA.
-        ioctl_clk             : out   std_logic;                                  -- I/O Clock.
-        ioctl_wr              : out   std_logic;                                  -- Write Enable to FPGA.
-        ioctl_rd              : out   std_logic;                                  -- Read Enable from FPGA.
-        ioctl_sense           : in    std_logic;                                  -- Sense to see if HPS accessing ioctl bus.
-        ioctl_select          : out   std_logic;                                  -- Enable CFU control over ioctl bus.
-        ioctl_addr            : out   std_logic_vector(24 downto 0);              -- Address in FPGA to write into.
-        ioctl_dout            : out   std_logic_vector(31 downto 0);              -- Data to be written into FPGA.
-        ioctl_din             : in    std_logic_vector(31 downto 0);              -- Data to be read into HPS.
-        -- 32-bit wishbone interface --
-        wb_adr_o              : out   std_logic_vector(31 downto 0); -- address
-        wb_dat_i              : in    std_logic_vector(31 downto 0); -- read data
-        wb_dat_o              : out   std_logic_vector(31 downto 0); -- write data
-        wb_we_o               : out   std_logic; -- read/write
-        wb_sel_o              : out   std_logic_vector(03 downto 0); -- byte enable
-        wb_stb_o              : out   std_logic; -- strobe
-        wb_cyc_o              : out   std_logic; -- valid cycle
-        wb_ack_i              : in    std_logic; -- transfer acknowledge
-        -- interrupts --
-        irq_i                 : in    std_logic; -- external interrupt request line
-        irq_ack_o             : out   std_logic  -- external interrupt request acknowledge
-    );
-end component;
+--component STORM_SoC
+--    port (
+--        -- Global Control --
+--        CLK_I                 : in    std_logic;
+--        RST_I                 : in    std_logic;
+--
+--        -- General purpose (debug) UART --
+--        UART0_RXD_I           : in    std_logic;
+--        UART0_TXD_O           : out   std_logic;
+--
+--        -- System Control --
+--        START_I               : in    std_logic; -- low active
+--        BOOT_CONFIG_I         : in    std_logic_vector(03 downto 0); -- low active
+--        LED_BAR_O             : out   std_logic_vector(07 downto 0);
+--
+--        -- GP Input Pins --
+--        GP_INPUT_I            : in    std_logic_vector(07 downto 0);
+--
+--        -- GP Output Pins --
+--        GP_OUTPUT_O           : out   std_logic_vector(07 downto 0);
+--
+--        -- I²C Port --
+--        I2C_SCL_IO            : inout std_logic;
+--        I2C_SDA_IO            : inout std_logic;
+--
+--        -- SPI Port 0 [3 devices] --
+--        SPI_P0_CLK_O          : out   std_logic;
+--        SPI_P0_MISO_I         : in    std_logic;
+--        SPI_P0_MOSI_O         : out   std_logic;
+--        SPI_P0_CS_O           : out   std_logic_vector(02 downto 0);
+--
+--        -- SPI Port 1 [3 devices] --
+--        SPI_P1_CLK_O          : out   std_logic;
+--        SPI_P1_MISO_I         : in    std_logic;
+--        SPI_P1_MOSI_O         : out   std_logic;
+--        SPI_P1_CS_O           : out   std_logic_vector(02 downto 0);
+--
+--        -- SPI Port 2 [2 devices] --
+--        SPI_P2_CLK_O          : out   std_logic;
+--        SPI_P2_MISO_I         : in    std_logic;
+--        SPI_P2_MOSI_O         : out   std_logic;
+--        SPI_P2_CS_O           : out   std_logic_vector(01 downto 0);
+--
+--        -- PWM Port 0 --
+----      PWM0_PORT_O           : out   std_logic_vector(07 downto 0)
+--
+--        -- IOCTL Bus --
+--        IOCTL_DOWNLOAD        : out   std_logic;                                  -- Downloading to FPGA.
+--        IOCTL_UPLOAD          : out   std_logic;                                  -- Uploading from FPGA.
+--        IOCTL_CLK             : out   std_logic;                                  -- I/O Clock.
+--        IOCTL_WR              : out   std_logic;                                  -- Write Enable to FPGA.
+--        IOCTL_RD              : out   std_logic;                                  -- Read Enable from FPGA.
+--        IOCTL_SENSE           : in    std_logic;                                  -- Sense to see if HPS accessing ioctl bus.
+--        IOCTL_SELECT          : out   std_logic;                                  -- Enable IOP control over ioctl bus.
+--        IOCTL_ADDR            : out   std_logic_vector(24 downto 0);              -- Address in FPGA to write into.
+--        IOCTL_DOUT            : out   std_logic_vector(31 downto 0);              -- Data to be written into FPGA.
+--        IOCTL_DIN             : in    std_logic_vector(31 downto 0)               -- Data to be read into HPS.
+--
+----      -- SDRAM Interface --
+----      SDRAM_CLK_O           : out   std_logic;
+----      SDRAM_CSN_O           : out   std_logic;
+----      SDRAM_CKE_O           : out   std_logic;
+----      SDRAM_RASN_O          : out   std_logic;
+----      SDRAM_CASN_O          : out   std_logic;
+----      SDRAM_WEN_O           : out   std_logic;
+----      SDRAM_DQM_O           : out   std_logic_vector(01 downto 0);
+----      SDRAM_BA_O            : out   std_logic_vector(01 downto 0);
+----      SDRAM_ADR_O           : out   std_logic_vector(11 downto 0);
+----      SDRAM_DAT_IO          : inout std_logic_vector(15 downto 0)
+--    );
+--end component;
+--
+--component neo430
+--    generic (
+--        -- general configuration --
+--        CLOCK_SPEED           : natural := 100000000; -- main clock in Hz
+--        IMEM_SIZE             : natural := 4*1024; -- internal IMEM size in bytes, max 48kB (default=4kB)
+--        DMEM_SIZE             : natural := 2*1024; -- internal DMEM size in bytes, max 12kB (default=2kB)
+--        -- additional configuration --
+--        USER_CODE             : std_logic_vector(15 downto 0) := x"0000"; -- custom user code
+--        -- module configuration --
+--        DADD_USE              : boolean := true; -- implement DADD instruction? (default=true)
+--        MULDIV_USE            : boolean := true; -- implement multiplier/divider unit? (default=true)
+--        WB32_USE              : boolean := false;-- implement WB32 unit? (default=true)
+--        WDT_USE               : boolean := true; -- implement WDT? (default=true)
+--        GPIO_USE              : boolean := true; -- implement GPIO unit? (default=true)
+--        TIMER_USE             : boolean := true; -- implement timer? (default=true)
+--        UART_USE              : boolean := true; -- implement UART? (default=true)
+--        CRC_USE               : boolean := true; -- implement CRC unit? (default=true)
+--        CFU_USE               : boolean := true; -- implement custom functions unit? (default=false)
+--        PWM_USE               : boolean := true; -- implement PWM controller?
+--        TWI_USE               : boolean := true; -- implement two wire serial interface? (default=true)
+--        SPI_USE               : boolean := true; -- implement SPI? (default=true)
+--        -- boot configuration --
+--        BOOTLD_USE            : boolean := true; -- implement and use bootloader? (default=true)
+--        IMEM_AS_ROM           : boolean := false -- implement IMEM as read-only memory? (default=false)
+--   );
+--    port (
+--        -- global control --
+--        clk_i                 : in    std_logic; -- global clock, rising edge
+--        rst_i                 : in    std_logic; -- global reset, async, low-active
+--        -- gpio --
+--        gpio_o                : out   std_logic_vector(15 downto 0); -- parallel output
+--        gpio_i                : in    std_logic_vector(15 downto 0); -- parallel input
+--        -- pwm channels --
+--        pwm_o                 : out   std_logic_vector(02 downto 0); -- pwm channels
+--        -- serial com --
+--        uart_txd_o            : out   std_logic; -- UART send data
+--        uart_rxd_i            : in    std_logic; -- UART receive data
+--        spi_sclk_o            : out   std_logic; -- serial clock line
+--        spi_mosi_o            : out   std_logic; -- serial data line out
+--        spi_miso_i            : in    std_logic; -- serial data line in
+--        spi_cs_o              : out   std_logic_vector(07 downto 0); -- SPI CS 0..7
+--        twi_sda_io            : inout std_logic; -- twi serial data line
+--        twi_scl_io            : inout std_logic; -- twi serial clock line
+--        -- IOCTL Bus --
+--        ioctl_download        : out   std_logic;                                  -- Downloading to FPGA.
+--        ioctl_upload          : out   std_logic;                                  -- Uploading from FPGA.
+--        ioctl_clk             : out   std_logic;                                  -- I/O Clock.
+--        ioctl_wr              : out   std_logic;                                  -- Write Enable to FPGA.
+--        ioctl_rd              : out   std_logic;                                  -- Read Enable from FPGA.
+--        ioctl_sense           : in    std_logic;                                  -- Sense to see if HPS accessing ioctl bus.
+--        ioctl_select          : out   std_logic;                                  -- Enable CFU control over ioctl bus.
+--        ioctl_addr            : out   std_logic_vector(24 downto 0);              -- Address in FPGA to write into.
+--        ioctl_dout            : out   std_logic_vector(31 downto 0);              -- Data to be written into FPGA.
+--        ioctl_din             : in    std_logic_vector(31 downto 0);              -- Data to be read into HPS.
+--        -- 32-bit wishbone interface --
+--        wb_adr_o              : out   std_logic_vector(31 downto 0); -- address
+--        wb_dat_i              : in    std_logic_vector(31 downto 0); -- read data
+--        wb_dat_o              : out   std_logic_vector(31 downto 0); -- write data
+--        wb_we_o               : out   std_logic; -- read/write
+--        wb_sel_o              : out   std_logic_vector(03 downto 0); -- byte enable
+--        wb_stb_o              : out   std_logic; -- strobe
+--        wb_cyc_o              : out   std_logic; -- valid cycle
+--        wb_ack_i              : in    std_logic; -- transfer acknowledge
+--        -- interrupts --
+--        irq_i                 : in    std_logic; -- external interrupt request line
+--        irq_ack_o             : out   std_logic  -- external interrupt request acknowledge
+--    );
+--end component;
 
 begin
 
@@ -356,156 +356,156 @@ begin
             IOCTL_DIN             => CON_IOCTL_DIN                                  -- Data to be read into HPS.
     );
 
-    -- If enabled, instantiate the local STORM IO processor to provide IO and user interface services.
-    --
-    STORM_ENABLED: if STORM_ENABLE = 1 generate
-      STORM_0: STORM_SoC
-        port map (
-            -- Global Control --
-            CLK_I                 => CON_CLKIOP,                                    -- global clock, rising edge
-            RST_I                 => (CON_COLD_RESET or CON_WARM_RESET),            -- global reset, async
+--    -- If enabled, instantiate the local STORM IO processor to provide IO and user interface services.
+--    --
+--    STORM_ENABLED: if STORM_ENABLE = 1 generate
+--      STORM_0: STORM_SoC
+--        port map (
+--            -- Global Control --
+--            CLK_I                 => CON_CLKIOP,                                    -- global clock, rising edge
+--            RST_I                 => (CON_COLD_RESET or CON_WARM_RESET),            -- global reset, async
+--
+--            -- General purpose (debug) UART --
+--            UART0_RXD_I           => CON_UART_RX,
+--            UART0_TXD_O           => CON_UART_TX,
+--
+--            -- System Control --
+--            START_I               => '1',
+--            BOOT_CONFIG_I         => "0000",
+--            LED_BAR_O             => open,
+--
+--            -- GP Input Pins --
+--            GP_INPUT_I            => x"FF",
+--
+--            -- GP Output Pins --
+--            GP_OUTPUT_O           => open,
+--
+--            -- I²C Port --
+--            I2C_SCL_IO            => open,
+--            I2C_SDA_IO            => open,
+--
+--            -- SPI Port 0 [3 devices] --
+--            SPI_P0_CLK_O          => CON_SPI_SCLK,
+--            SPI_P0_MISO_I         => CON_SPI_MISO,
+--            SPI_P0_MOSI_O         => CON_SPI_MOSI,
+--            SPI_P0_CS_O           => CON_SPI_CS(2 downto 0),
+--
+--            -- SPI Port 1 [3 devices] --
+--            SPI_P1_CLK_O          => open,
+--            SPI_P1_MISO_I         => '0',
+--            SPI_P1_MOSI_O         => open,
+--            SPI_P1_CS_O           => open,
+--
+--            -- SPI Port 2 [2 devices] --
+--            SPI_P2_CLK_O          => open,
+--            SPI_P2_MISO_I         => '0',
+--            SPI_P2_MOSI_O         => open,
+--            SPI_P2_CS_O           => open,
+--
+--            -- PWM Port 0 --
+----          PWM0_PORT_O           => open
+--
+--            -- IOCTL Bus --
+--            IOCTL_DOWNLOAD        => IOP_IOCTL_DOWNLOAD,                            -- Downloading to FPGA.
+--            IOCTL_UPLOAD          => IOP_IOCTL_UPLOAD,                              -- Uploading from FPGA.
+--            IOCTL_CLK             => IOP_IOCTL_CLK,                                 -- I/O Clock.
+--            IOCTL_WR              => IOP_IOCTL_WR,                                  -- Write Enable to FPGA.
+--            IOCTL_RD              => IOP_IOCTL_RD,                                  -- Read Enable from FPGA.
+--            IOCTL_SENSE           => IOP_IOCTL_SENSE,                               -- Sense to see if HPS accessing ioctl bus.
+--            IOCTL_SELECT          => IOP_IOCTL_SELECT,                              -- Enable IOP control over ioctl bus.
+--            IOCTL_ADDR            => IOP_IOCTL_ADDR,                                -- Address in FPGA to write into.
+--            IOCTL_DOUT            => IOP_IOCTL_DOUT,                                -- Data to be written into FPGA.
+--            IOCTL_DIN             => IOP_IOCTL_DIN                                  -- Data to be read into HPS.
+--
+----          -- SDRAM Interface --
+----          SDRAM_CLK_O           => open,
+----          SDRAM_CSN_O           => open,
+----          SDRAM_CKE_O           => open,
+----          SDRAM_RASN_O          => open,
+----          SDRAM_CASN_O          => open,
+----          SDRAM_WEN_O           => open,
+----          SDRAM_DQM_O           => open,
+----          SDRAM_BA_O            => open,
+----          SDRAM_ADR_O           => open,
+----          SDRAM_DAT_IO          => open
+--        );
+--    end generate;
+--
+--    -- If enabled, instantiate the local IO processor to provide IO and user interface services.
+--    --
+--    NEO430_ENABLED: if NEO_ENABLE = 1 generate
+--      NEO430_0 : neo430
+--        generic map (
+--            -- general configuration --
+--            CLOCK_SPEED           => 64000000,                                      -- main clock in Hz
+--            IMEM_SIZE             => 48*1024,                                       -- internal IMEM size in bytes, max 48kB (default=4kB)
+--            DMEM_SIZE             => 12*1024,                                       -- internal DMEM size in bytes, max 12kB (default=2kB)
+--            -- additional configuration --
+--            USER_CODE             => x"0000",                                       -- custom user code
+--            -- module configuration --
+--            DADD_USE              => true,                                          -- implement DADD instruction? (default=true)
+--            MULDIV_USE            => true,                                          -- implement multiplier/divider unit? (default=true)
+--            WB32_USE              => false,                                         -- implement WB32 unit? (default=true)
+--            WDT_USE               => true,                                          -- implement WDT? (default=true)
+--            GPIO_USE              => true,                                          -- implement GPIO unit? (default=true)
+--            TIMER_USE             => true,                                          -- implement timer? (default=true)
+--            UART_USE              => true,                                          -- implement UART? (default=true)
+--            CRC_USE               => false,                                         -- implement CRC unit? (default=true)
+--            CFU_USE               => false,                                         -- implement custom functions unit? (default=false)
+--            PWM_USE               => true,                                          -- implement PWM controller?
+--            TWI_USE               => false,                                         -- implement two wire serial interface? (default=true)
+--            SPI_USE               => true,                                          -- implement SPI? (default=true)
+--            -- boot configuration --
+--            BOOTLD_USE            => true,                                          -- implement and use bootloader? (default=true)
+--            IMEM_AS_ROM           => false                                          -- implement IMEM as read-only memory? (default=false)
+--        )
+--        port map (
+--            -- global control --
+--            clk_i                 => CON_CLKIOP,                                    -- global clock, rising edge
+--            rst_i                 => not (CON_COLD_RESET or CON_WARM_RESET),        -- global reset, async
+--            -- gpio --
+--            gpio_o                => open,                                          -- parallel output
+--            gpio_i                => X"0000",                                       -- parallel input
+--            -- pwm channels --
+--            pwm_o                 => open,                                          -- pwm channels
+--            -- serial com --
+--            uart_txd_o            => CON_UART_TX,                                   -- UART send data
+--            uart_rxd_i            => CON_UART_RX,                                   -- UART receive data
+--            spi_sclk_o            => CON_SPI_SCLK,                                  -- serial clock line
+--            spi_mosi_o            => CON_SPI_MOSI,                                  -- serial data line out
+--            spi_miso_i            => CON_SPI_MISO,                                  -- serial data line in
+--            spi_cs_o              => CON_SPI_CS,                                    -- SPI CS 0..7
+--            twi_sda_io            => open,                                          -- twi serial data line
+--            twi_scl_io            => open,                                          -- twi serial clock line
+--            -- IOCTL Bus --
+--            ioctl_download        => IOP_IOCTL_DOWNLOAD,                            -- Downloading to FPGA.
+--            ioctl_upload          => IOP_IOCTL_UPLOAD,                              -- Uploading from FPGA.
+--            ioctl_clk             => IOP_IOCTL_CLK,                                 -- I/O Clock.
+--            ioctl_wr              => IOP_IOCTL_WR,                                  -- Write Enable to FPGA.
+--            ioctl_rd              => IOP_IOCTL_RD,                                  -- Read Enable from FPGA.
+--            ioctl_sense           => IOP_IOCTL_SENSE,                               -- Sense to see if HPS accessing ioctl bus.
+--            ioctl_select          => IOP_IOCTL_SELECT,                              -- Enable CFU control over ioctl bus.
+--            ioctl_addr            => IOP_IOCTL_ADDR,                                -- Address in FPGA to write into.
+--            ioctl_dout            => IOP_IOCTL_DOUT,                                -- Data to be written into FPGA.
+--            ioctl_din             => IOP_IOCTL_DIN,                                 -- Data to be read into HPS.
+--            -- 32-bit wishbone interface --
+--            wb_adr_o              => open,                                          -- address
+--            wb_dat_i              => (others => '0'),                               -- read data
+--            wb_dat_o              => open,                                          -- write data
+--            wb_we_o               => open,                                          -- read/write
+--            wb_sel_o              => open,                                          -- byte enable
+--            wb_stb_o              => open,                                          -- strobe
+--            wb_cyc_o              => open,                                          -- valid cycle
+--            wb_ack_i              => '0',                                           -- transfer acknowledge
+--            -- interrupts --
+--            irq_i                 => '0',                                           -- external interrupt request line
+--            irq_ack_o             => open                                           -- external interrupt request acknowledge
+--        );
+--    end generate;
 
-            -- General purpose (debug) UART --
-            UART0_RXD_I           => CON_UART_RX,
-            UART0_TXD_O           => CON_UART_TX,
-
-            -- System Control --
-            START_I               => '1',
-            BOOT_CONFIG_I         => "0000",
-            LED_BAR_O             => open,
-
-            -- GP Input Pins --
-            GP_INPUT_I            => x"FF",
-
-            -- GP Output Pins --
-            GP_OUTPUT_O           => open,
-
-            -- I²C Port --
-            I2C_SCL_IO            => open,
-            I2C_SDA_IO            => open,
-
-            -- SPI Port 0 [3 devices] --
-            SPI_P0_CLK_O          => CON_SPI_SCLK,
-            SPI_P0_MISO_I         => CON_SPI_MISO,
-            SPI_P0_MOSI_O         => CON_SPI_MOSI,
-            SPI_P0_CS_O           => CON_SPI_CS(2 downto 0),
-
-            -- SPI Port 1 [3 devices] --
-            SPI_P1_CLK_O          => open,
-            SPI_P1_MISO_I         => '0',
-            SPI_P1_MOSI_O         => open,
-            SPI_P1_CS_O           => open,
-
-            -- SPI Port 2 [2 devices] --
-            SPI_P2_CLK_O          => open,
-            SPI_P2_MISO_I         => '0',
-            SPI_P2_MOSI_O         => open,
-            SPI_P2_CS_O           => open,
-
-            -- PWM Port 0 --
---          PWM0_PORT_O           => open
-
-            -- IOCTL Bus --
-            IOCTL_DOWNLOAD        => IOP_IOCTL_DOWNLOAD,                            -- Downloading to FPGA.
-            IOCTL_UPLOAD          => IOP_IOCTL_UPLOAD,                              -- Uploading from FPGA.
-            IOCTL_CLK             => IOP_IOCTL_CLK,                                 -- I/O Clock.
-            IOCTL_WR              => IOP_IOCTL_WR,                                  -- Write Enable to FPGA.
-            IOCTL_RD              => IOP_IOCTL_RD,                                  -- Read Enable from FPGA.
-            IOCTL_SENSE           => IOP_IOCTL_SENSE,                               -- Sense to see if HPS accessing ioctl bus.
-            IOCTL_SELECT          => IOP_IOCTL_SELECT,                              -- Enable IOP control over ioctl bus.
-            IOCTL_ADDR            => IOP_IOCTL_ADDR,                                -- Address in FPGA to write into.
-            IOCTL_DOUT            => IOP_IOCTL_DOUT,                                -- Data to be written into FPGA.
-            IOCTL_DIN             => IOP_IOCTL_DIN                                  -- Data to be read into HPS.
-
---          -- SDRAM Interface --
---          SDRAM_CLK_O           => open,
---          SDRAM_CSN_O           => open,
---          SDRAM_CKE_O           => open,
---          SDRAM_RASN_O          => open,
---          SDRAM_CASN_O          => open,
---          SDRAM_WEN_O           => open,
---          SDRAM_DQM_O           => open,
---          SDRAM_BA_O            => open,
---          SDRAM_ADR_O           => open,
---          SDRAM_DAT_IO          => open
-        );
-    end generate;
-
-    -- If enabled, instantiate the local IO processor to provide IO and user interface services.
-    --
-    NEO430_ENABLED: if NEO_ENABLE = 1 generate
-      NEO430_0 : neo430
-        generic map (
-            -- general configuration --
-            CLOCK_SPEED           => 64000000,                                      -- main clock in Hz
-            IMEM_SIZE             => 48*1024,                                       -- internal IMEM size in bytes, max 48kB (default=4kB)
-            DMEM_SIZE             => 12*1024,                                       -- internal DMEM size in bytes, max 12kB (default=2kB)
-            -- additional configuration --
-            USER_CODE             => x"0000",                                       -- custom user code
-            -- module configuration --
-            DADD_USE              => true,                                          -- implement DADD instruction? (default=true)
-            MULDIV_USE            => true,                                          -- implement multiplier/divider unit? (default=true)
-            WB32_USE              => false,                                         -- implement WB32 unit? (default=true)
-            WDT_USE               => true,                                          -- implement WDT? (default=true)
-            GPIO_USE              => true,                                          -- implement GPIO unit? (default=true)
-            TIMER_USE             => true,                                          -- implement timer? (default=true)
-            UART_USE              => true,                                          -- implement UART? (default=true)
-            CRC_USE               => false,                                         -- implement CRC unit? (default=true)
-            CFU_USE               => false,                                         -- implement custom functions unit? (default=false)
-            PWM_USE               => true,                                          -- implement PWM controller?
-            TWI_USE               => false,                                         -- implement two wire serial interface? (default=true)
-            SPI_USE               => true,                                          -- implement SPI? (default=true)
-            -- boot configuration --
-            BOOTLD_USE            => true,                                          -- implement and use bootloader? (default=true)
-            IMEM_AS_ROM           => false                                          -- implement IMEM as read-only memory? (default=false)
-        )
-        port map (
-            -- global control --
-            clk_i                 => CON_CLKIOP,                                    -- global clock, rising edge
-            rst_i                 => not (CON_COLD_RESET or CON_WARM_RESET),        -- global reset, async
-            -- gpio --
-            gpio_o                => open,                                          -- parallel output
-            gpio_i                => X"0000",                                       -- parallel input
-            -- pwm channels --
-            pwm_o                 => open,                                          -- pwm channels
-            -- serial com --
-            uart_txd_o            => CON_UART_TX,                                   -- UART send data
-            uart_rxd_i            => CON_UART_RX,                                   -- UART receive data
-            spi_sclk_o            => CON_SPI_SCLK,                                  -- serial clock line
-            spi_mosi_o            => CON_SPI_MOSI,                                  -- serial data line out
-            spi_miso_i            => CON_SPI_MISO,                                  -- serial data line in
-            spi_cs_o              => CON_SPI_CS,                                    -- SPI CS 0..7
-            twi_sda_io            => open,                                          -- twi serial data line
-            twi_scl_io            => open,                                          -- twi serial clock line
-            -- IOCTL Bus --
-            ioctl_download        => IOP_IOCTL_DOWNLOAD,                            -- Downloading to FPGA.
-            ioctl_upload          => IOP_IOCTL_UPLOAD,                              -- Uploading from FPGA.
-            ioctl_clk             => IOP_IOCTL_CLK,                                 -- I/O Clock.
-            ioctl_wr              => IOP_IOCTL_WR,                                  -- Write Enable to FPGA.
-            ioctl_rd              => IOP_IOCTL_RD,                                  -- Read Enable from FPGA.
-            ioctl_sense           => IOP_IOCTL_SENSE,                               -- Sense to see if HPS accessing ioctl bus.
-            ioctl_select          => IOP_IOCTL_SELECT,                              -- Enable CFU control over ioctl bus.
-            ioctl_addr            => IOP_IOCTL_ADDR,                                -- Address in FPGA to write into.
-            ioctl_dout            => IOP_IOCTL_DOUT,                                -- Data to be written into FPGA.
-            ioctl_din             => IOP_IOCTL_DIN,                                 -- Data to be read into HPS.
-            -- 32-bit wishbone interface --
-            wb_adr_o              => open,                                          -- address
-            wb_dat_i              => (others => '0'),                               -- read data
-            wb_dat_o              => open,                                          -- write data
-            wb_we_o               => open,                                          -- read/write
-            wb_sel_o              => open,                                          -- byte enable
-            wb_stb_o              => open,                                          -- strobe
-            wb_cyc_o              => open,                                          -- valid cycle
-            wb_ack_i              => '0',                                           -- transfer acknowledge
-            -- interrupts --
-            irq_i                 => '0',                                           -- external interrupt request line
-            irq_ack_o             => open                                           -- external interrupt request acknowledge
-        );
-    end generate;
-
-    -- If the IO Processor is disabled, set the signals to inactive.
-    --
-    IOP_DISABLED: if NEO_ENABLE = 0 and STORM_ENABLE = 0 generate
+--    -- If the IO Processor is disabled, set the signals to inactive.
+--    --
+--    IOP_DISABLED: if NEO_ENABLE = 0 and STORM_ENABLE = 0 generate
         IOP_IOCTL_DOWNLOAD        <= '0';
         IOP_IOCTL_UPLOAD          <= '0';
         IOP_IOCTL_CLK             <= '0';
@@ -516,7 +516,7 @@ begin
         --IOP_IOCTL_DIN           => open;
         --IOP_IOCTL_SENSE         => open;
         IOP_IOCTL_SELECT          <= '0';
-    end generate;
+--    end generate;
 
     -- Assign signals from the emu onto local wires.
     --
