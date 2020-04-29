@@ -21,7 +21,6 @@
 *.out.sdc
 *.sof
 *.sld
-*.rbf
 *.qws
 *.sav
 *.pof
