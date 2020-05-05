@@ -12,7 +12,13 @@
 -- Credits:         
 -- Copyright:       (c) 2018 Philip Smart <philip.smart@net2net.org>
 --
--- History:         November 2018 - Initial creation.
+-- History:         November 2018    - Initial creation.
+--                  April 2020       - Started to blend in ZPU developments after giving up on the
+--                                     STORM processor (very nice but I hit a cache bug and it wasnt a
+--                                     quick fix, the STORM is no longer maintained). I moved onto the
+--                                     Neo430 from the same designer which is very nice but a little
+--                                     underpowered for what I need in this emulator, hence settling on 
+--                                     my own version of the ZPU which I can customise as necessary.
 --
 ---------------------------------------------------------------------------------------------------------
 -- This source file is free software: you can redistribute it and-or modify
@@ -36,48 +42,65 @@ use ieee.std_logic_unsigned.all;
 use pkgs.config_pkg.all;
 use pkgs.clkgen_pkg.all;
 use pkgs.mctrl_pkg.all;
+use work.zpu_soc_pkg.all;
+use work.zpu_pkg.all;
 
 entity bridge is
   port(
-        --------------------                Clock Input                         ----------------------------     
-        clkmaster             : in    std_logic;                                -- Master Clock(50MHz)
-        clksys                : out   std_logic;                                -- System clock.
-        clkvid                : out   std_logic;                                -- Pixel base clock of video.
-        --------------------             Reset                                  ----------------------------
-        cold_reset            : in    std_logic;
-        warm_reset            : in    std_logic;
-        --------------------                     main_leds                      ----------------------------
-        main_leds             : out   std_logic_vector(7 downto 0);             -- main_leds Green[7:0]
-        --------------------                     PS2                            ----------------------------
-        ps2_key               : in    std_logic_vector(10 downto 0);            -- PS2 Key data.
-        --------------------                     VGA                            ----------------------------
-        vga_hb_o              : out   std_logic;                                -- VGA Horizontal Blank
-        vga_vb_o              : out   std_logic;                                -- VGA Vertical Blank
-        vga_hs_o              : out   std_logic;                                -- VGA H_SYNC
-        vga_vs_o              : out   std_logic;                                -- VGA V_SYNC
-        vga_r_o               : out   std_logic_vector(7 downto 0);             -- VGA Red[3:0], [7:4] = 0
-        vga_g_o               : out   std_logic_vector(7 downto 0);             -- VGA Green[3:0]
-        vga_b_o               : out   std_logic_vector(7 downto 0);             -- VGA Blue[3:0]
-        --------------------                     AUDIO                          ------------------------------
-        audio_l_o             : out   std_logic;
-        audio_r_o             : out   std_logic;
-
-        uart_rx               : in    std_logic;
-        uart_tx               : out   std_logic; 
-        sd_sck                : out   std_logic; 
-        sd_mosi               : out   std_logic; 
-        sd_miso               : in    std_logic; 
-        sd_cs                 : out   std_logic;
-        sd_cd                 : out   std_logic; 
-        --------------------                   HPS Interface                    ------------------------------
-        ioctl_download        : in    std_logic;                                -- HPS Downloading to FPGA.
-        ioctl_upload          : in    std_logic;                                -- HPS Uploading from FPGA.
-        ioctl_clk             : in    std_logic;                                -- HPS I/O Clock.
-        ioctl_wr              : in    std_logic;                                -- HPS Write Enable to FPGA.
-        ioctl_rd              : in    std_logic;                                -- HPS Read Enable from FPGA.
-        ioctl_addr            : in    std_logic_vector(24 downto 0);            -- HPS Address in FPGA to write into.
-        ioctl_dout            : in    std_logic_vector(15 downto 0);            -- HPS Data to be written into FPGA.
-        ioctl_din             : out   std_logic_vector(15 downto 0)             -- HPS Data to be read into HPS.
+        --------------------      Clock Input         ----------------------------     
+        clkmaster                 : in    std_logic;                                -- Master Clock(50MHz)
+        clksys                    : out   std_logic;                                -- System clock.
+        clkvid                    : out   std_logic;                                -- Pixel base clock of video.
+        --------------------      Reset               ----------------------------
+        cold_reset                : in    std_logic;
+        warm_reset                : in    std_logic;
+        --------------------      main_leds           ----------------------------
+        main_leds                 : out   std_logic_vector(7 downto 0);             -- main_leds Green[7:0]
+        --------------------      PS2                 ----------------------------
+        ps2_key                   : in    std_logic_vector(10 downto 0);            -- PS2 Key data.
+        --------------------      VGA                 ----------------------------
+        vga_hb_o                  : out   std_logic;                                -- VGA Horizontal Blank
+        vga_vb_o                  : out   std_logic;                                -- VGA Vertical Blank
+        vga_hs_o                  : out   std_logic;                                -- VGA H_SYNC
+        vga_vs_o                  : out   std_logic;                                -- VGA V_SYNC
+        vga_r_o                   : out   std_logic_vector(7 downto 0);             -- VGA Red[3:0], [7:4] = 0
+        vga_g_o                   : out   std_logic_vector(7 downto 0);             -- VGA Green[3:0]
+        vga_b_o                   : out   std_logic_vector(7 downto 0);             -- VGA Blue[3:0]
+        --------------------      AUDIO               ------------------------------
+        audio_l_o                 : out   std_logic;
+        audio_r_o                 : out   std_logic;
+        -------------------- ZPU UART CONSOLE & DEBUG ------------------------------
+        uart_rx_0                 : in    std_logic;
+        uart_tx_0                 : out   std_logic; 
+        uart_rx_1                 : in    std_logic;
+        uart_tx_1                 : out   std_logic; 
+        --------------------      SDCARD              ------------------------------
+        sd_sck                    : out   std_logic; 
+        sd_mosi                   : out   std_logic; 
+        sd_miso                   : in    std_logic; 
+        sd_cs                     : out   std_logic;
+        sd_cd                     : out   std_logic; 
+        --------------------      SDRAM               ------------------------------
+        sdram_clk                 : out   std_logic;
+        sdram_cke                 : out   std_logic;
+        sdram_addr                : out   std_logic_vector(12 downto 0);
+        sdram_ba                  : out   std_logic_vector(1 downto 0);
+        sdram_dq                  : inout std_logic_vector(15 downto 0);
+        sdram_dqml                : out   std_logic;
+        sdram_dqmh                : out   std_logic;
+        sdram_cs_n                : out   std_logic;
+        sdram_cas_n               : out   std_logic;
+        sdram_ras_n               : out   std_logic;
+        sdram_we_n                : out   std_logic;
+        --------------------      HPS Interface       ------------------------------
+        ioctl_download            : in    std_logic;                                -- HPS Downloading to FPGA.
+        ioctl_upload              : in    std_logic;                                -- HPS Uploading from FPGA.
+        ioctl_clk                 : in    std_logic;                                -- HPS I/O Clock.
+        ioctl_wr                  : in    std_logic;                                -- HPS Write Enable to FPGA.
+        ioctl_rd                  : in    std_logic;                                -- HPS Read Enable from FPGA.
+        ioctl_addr                : in    std_logic_vector(24 downto 0);            -- HPS Address in FPGA to write into.
+        ioctl_dout                : in    std_logic_vector(15 downto 0);            -- HPS Data to be written into FPGA.
+        ioctl_din                 : out   std_logic_vector(15 downto 0)             -- HPS Data to be read into HPS.
 );
 end bridge;
 
@@ -86,236 +109,339 @@ architecture rtl of bridge is
 --
 -- Signals.
 --
-signal CON_CLKMASTER          :       std_logic;
-signal CON_CLKSYS             :       std_logic;
-signal CON_CLKVID             :       std_logic;
-signal CON_CLKIOP             :       std_logic;
-signal CON_COLD_RESET         :       std_logic;
-signal CON_WARM_RESET         :       std_logic;
-signal CON_MAIN_LEDS          :       std_logic_vector(7 downto 0);
-signal CON_PS2_KEY            :       std_logic_vector(10 downto 0);
-signal CON_VGA_HB_O           :       std_logic;
-signal CON_VGA_VB_O           :       std_logic;
-signal CON_VGA_HS_O           :       std_logic;
-signal CON_VGA_VS_O           :       std_logic;
-signal CON_VGA_R_O            :       std_logic_vector(7 downto 0);
-signal CON_VGA_G_O            :       std_logic_vector(7 downto 0);
-signal CON_VGA_B_O            :       std_logic_vector(7 downto 0);
-signal CON_AUDIO_L_O          :       std_logic;
-signal CON_AUDIO_R_O          :       std_logic;
-signal CON_IOCTL_DOWNLOAD     :       std_logic;
-signal CON_IOCTL_UPLOAD       :       std_logic;
-signal CON_IOCTL_CLK          :       std_logic;
-signal CON_IOCTL_WR           :       std_logic;
-signal CON_IOCTL_RD           :       std_logic;
-signal CON_IOCTL_ADDR         :       std_logic_vector(24 downto 0);
-signal CON_IOCTL_DOUT         :       std_logic_vector(31 downto 0);
-signal CON_IOCTL_DIN          :       std_logic_vector(31 downto 0);
+signal CON_CLKMASTER              :       std_logic;
+signal CON_CLKSYS                 :       std_logic;
+signal CON_CLKVID                 :       std_logic;
+signal CON_CLKIOP                 :       std_logic;
+signal CON_CLKIOPMEM              :       std_logic;
+signal CON_PLL_LOCKED             :       std_logic;
+signal CON_COLD_RESET             :       std_logic;
+signal CON_WARM_RESET             :       std_logic;
+signal CON_MAIN_LEDS              :       std_logic_vector(7 downto 0);
+signal CON_PS2_KEY                :       std_logic_vector(10 downto 0);
+signal CON_VGA_HB_O               :       std_logic;
+signal CON_VGA_VB_O               :       std_logic;
+signal CON_VGA_HS_O               :       std_logic;
+signal CON_VGA_VS_O               :       std_logic;
+signal CON_VGA_R_O                :       std_logic_vector(7 downto 0);
+signal CON_VGA_G_O                :       std_logic_vector(7 downto 0);
+signal CON_VGA_B_O                :       std_logic_vector(7 downto 0);
+signal CON_AUDIO_L_O              :       std_logic;
+signal CON_AUDIO_R_O              :       std_logic;
+signal CON_SDRAM_DQM              :       std_logic_vector(1 downto 0);
+signal CON_IOCTL_DOWNLOAD         :       std_logic;
+signal CON_IOCTL_UPLOAD           :       std_logic;
+signal CON_IOCTL_CLK              :       std_logic;
+signal CON_IOCTL_WR               :       std_logic;
+signal CON_IOCTL_RD               :       std_logic;
+signal CON_IOCTL_ADDR             :       std_logic_vector(24 downto 0);
+signal CON_IOCTL_DOUT             :       std_logic_vector(31 downto 0);
+signal CON_IOCTL_DIN              :       std_logic_vector(31 downto 0);
 --
 -- IO Processor Signals.
 --
-signal IOP_IOCTL_DOWNLOAD     :       std_logic;
-signal IOP_IOCTL_UPLOAD       :       std_logic;
-signal IOP_IOCTL_CLK          :       std_logic;
-signal IOP_IOCTL_WR           :       std_logic;
-signal IOP_IOCTL_RD           :       std_logic;
-signal IOP_IOCTL_ADDR         :       std_logic_vector(24 downto 0);
-signal IOP_IOCTL_DOUT         :       std_logic_vector(31 downto 0);
-signal IOP_IOCTL_DIN          :       std_logic_vector(31 downto 0);
-signal IOP_IOCTL_SENSE        :       std_logic;
-signal IOP_IOCTL_SELECT       :       std_logic;
+signal IOP_IOCTL_DOWNLOAD         :       std_logic;
+signal IOP_IOCTL_UPLOAD           :       std_logic;
+signal IOP_IOCTL_CLK              :       std_logic;
+signal IOP_IOCTL_WR               :       std_logic;
+signal IOP_IOCTL_RD               :       std_logic;
+signal IOP_IOCTL_ADDR             :       std_logic_vector(24 downto 0);
+signal IOP_IOCTL_DOUT             :       std_logic_vector(31 downto 0);
+signal IOP_IOCTL_DIN              :       std_logic_vector(31 downto 0);
+signal IOP_IOCTL_SENSE            :       std_logic;
+signal IOP_IOCTL_SELECT           :       std_logic;
 --
 --
 --
-signal CON_UART_TX            :       std_logic;
-signal CON_UART_RX            :       std_logic;
-signal CON_SPI_SCLK           :       std_logic;
-signal CON_SPI_MOSI           :       std_logic;
-signal CON_SPI_MISO           :       std_logic;
-signal CON_SPI_CS             :       std_logic_vector(7 downto 0);
+signal CON_UART_RX_0              :       std_logic;
+signal CON_UART_TX_0              :       std_logic;
+signal CON_UART_RX_1              :       std_logic;
+signal CON_UART_TX_1              :       std_logic;
+signal CON_SPI_SCLK               :       std_logic_vector(SOC_SD_DEVICES-1 downto 0);
+signal CON_SPI_MOSI               :       std_logic_vector(SOC_SD_DEVICES-1 downto 0);
+signal CON_SPI_MISO               :       std_logic_vector(SOC_SD_DEVICES-1 downto 0);
+signal CON_SPI_CS                 :       std_logic_vector(SOC_SD_DEVICES-1 downto 0);
 
+signal sysclk : std_logic;
+signal memclk : std_logic;
 --
 -- Components
 --
 component sharpmz
     port (
-        --------------------                Clock Input                         ----------------------------     
-        CLKMASTER             : in    std_logic;                                -- Master Clock(50MHz)
-        CLKSYS                : out   std_logic;                                -- System clock.
-        CLKVID                : out   std_logic;                                -- Pixel base clock of video.
-        CLKIOP                : out   std_logic;                                -- IO processor clock.
-        --------------------             Reset                                  ----------------------------
-        COLD_RESET            : in    std_logic;
-        WARM_RESET            : in    std_logic;
-        --------------------                     main_leds                      ----------------------------
-        MAIN_LEDS             : out   std_logic_vector(7 downto 0);             -- main_leds Green[7:0]
-        --------------------                     PS2                            ----------------------------
-        PS2_KEY               : in    std_logic_vector(10 downto 0);            -- PS2 Key data.
-        --------------------                     VGA                            ----------------------------
-        VGA_HB_O              : out   std_logic;                                -- VGA Horizontal Blank
-        VGA_VB_O              : out   std_logic;                                -- VGA Vertical Blank
-        VGA_HS_O              : out   std_logic;                                -- VGA H_SYNC
-        VGA_VS_O              : out   std_logic;                                -- VGA V_SYNC
-        VGA_R_O               : out   std_logic_vector(7 downto 0);             -- VGA Red[3:0], [7:4] = 0
-        VGA_G_O               : out   std_logic_vector(7 downto 0);             -- VGA Green[3:0]
-        VGA_B_O               : out   std_logic_vector(7 downto 0);             -- VGA Blue[3:0]
-        --------------------                     AUDIO                          ------------------------------
-        AUDIO_L_O             : out   std_logic;
-        AUDIO_R_O             : out   std_logic;
-        --------------------                   HPS Interface                    ------------------------------
-        IOCTL_DOWNLOAD        : in    std_logic;                                -- Downloading to FPGA.
-        IOCTL_UPLOAD          : in    std_logic;                                -- Uploading from FPGA.
-        IOCTL_CLK             : in    std_logic;                                -- I/O Clock.
-        IOCTL_WR              : in    std_logic;                                -- Write Enable to FPGA.
-        IOCTL_RD              : in    std_logic;                                -- Read Enable from FPGA.
-        IOCTL_ADDR            : in    std_logic_vector(24 downto 0);            -- Address in FPGA to write into.
-        IOCTL_DOUT            : in    std_logic_vector(31 downto 0);            -- Data to be written into FPGA.
-        IOCTL_DIN             : out   std_logic_vector(31 downto 0)             -- Data to be read into HPS.
+        --------------------      Clock Input         ----------------------------     
+        CLKMASTER                 : in    std_logic;                                -- Master Clock(50MHz)
+        CLKSYS                    : out   std_logic;                                -- System clock.
+        CLKVID                    : out   std_logic;                                -- Pixel base clock of video.
+        --------------------      Reset               ----------------------------
+        COLD_RESET                : in    std_logic;
+        WARM_RESET                : in    std_logic;
+        --------------------      main_leds           ----------------------------
+        MAIN_LEDS                 : out   std_logic_vector(7 downto 0);             -- main_leds Green[7:0]
+        --------------------      PS2                 ----------------------------
+        PS2_KEY                   : in    std_logic_vector(10 downto 0);            -- PS2 Key data.
+        --------------------      VGA                 ----------------------------
+        VGA_HB_O                  : out   std_logic;                                -- VGA Horizontal Blank
+        VGA_VB_O                  : out   std_logic;                                -- VGA Vertical Blank
+        VGA_HS_O                  : out   std_logic;                                -- VGA H_SYNC
+        VGA_VS_O                  : out   std_logic;                                -- VGA V_SYNC
+        VGA_R_O                   : out   std_logic_vector(7 downto 0);             -- VGA Red[3:0], [7:4] = 0
+        VGA_G_O                   : out   std_logic_vector(7 downto 0);             -- VGA Green[3:0]
+        VGA_B_O                   : out   std_logic_vector(7 downto 0);             -- VGA Blue[3:0]
+        --------------------      AUDIO               ------------------------------
+        AUDIO_L_O                 : out   std_logic;
+        AUDIO_R_O                 : out   std_logic;
+        --------------------      SDRAM               ------------------------------
+
+        --------------------      HPS Interface       ------------------------------
+        IOCTL_DOWNLOAD            : in    std_logic;                                -- Downloading to FPGA.
+        IOCTL_UPLOAD              : in    std_logic;                                -- Uploading from FPGA.
+        IOCTL_CLK                 : in    std_logic;                                -- I/O Clock.
+        IOCTL_WR                  : in    std_logic;                                -- Write Enable to FPGA.
+        IOCTL_RD                  : in    std_logic;                                -- Read Enable from FPGA.
+        IOCTL_ADDR                : in    std_logic_vector(24 downto 0);            -- Address in FPGA to write into.
+        IOCTL_DOUT                : in    std_logic_vector(31 downto 0);            -- Data to be written into FPGA.
+        IOCTL_DIN                 : out   std_logic_vector(31 downto 0)             -- Data to be read into HPS.
     );
+end component;
+
+component zpu_soc
+    generic (
+        SYSCLK_FREQUENCY          : integer := SYSTEM_FREQUENCY                       -- System clock frequency
+    );
+    port (
+        -- Global Control --
+        SYSCLK                    : in    std_logic;                                  -- System clock, running at frequency indicated in SYSCLK_FREQUENCY
+        MEMCLK                    : in    std_logic;                                  -- Memory clock, running at twice frequency indicated in SYSCLK_FREQUENCY
+        RESET_IN                  : in    std_logic;
+
+        -- UART 0 & 1
+        UART_RX_0                 : in    std_logic;
+        UART_TX_0                 : out   std_logic;
+        UART_RX_1                 : in    std_logic;
+        UART_TX_1                 : out   std_logic;
+
+        -- SPI signals
+        SPI_MISO                  : in    std_logic := '1';                           -- Allow the SPI interface not to be plumbed in.
+        SPI_MOSI                  : out   std_logic;
+        SPI_CLK                   : out   std_logic;
+        SPI_CS                    : out   std_logic;
+
+        -- SD Card (SPI) signals
+        SDCARD_MISO               : in    std_logic_vector(SOC_SD_DEVICES-1 downto 0) := (others => '1');
+        SDCARD_MOSI               : out   std_logic_vector(SOC_SD_DEVICES-1 downto 0);
+        SDCARD_CLK                : out   std_logic_vector(SOC_SD_DEVICES-1 downto 0);
+        SDCARD_CS                 : out   std_logic_vector(SOC_SD_DEVICES-1 downto 0);
+        
+        -- PS/2 signals
+        PS2K_CLK_IN               : in    std_logic := '1';
+        PS2K_DAT_IN               : in    std_logic := '1';
+        PS2K_CLK_OUT              : out   std_logic;
+        PS2K_DAT_OUT              : out   std_logic;
+        PS2M_CLK_IN               : in    std_logic := '1';
+        PS2M_DAT_IN               : in    std_logic := '1';
+        PS2M_CLK_OUT              : out   std_logic;
+        PS2M_DAT_OUT              : out   std_logic;
+
+        -- I²C signals
+        I2C_SCL_IO                : inout std_logic;
+        I2C_SDA_IO                : inout std_logic;    
+
+        -- IOCTL Bus
+        IOCTL_DOWNLOAD            : out   std_logic;                                  -- Downloading to FPGA.
+        IOCTL_UPLOAD              : out   std_logic;                                  -- Uploading from FPGA.
+        IOCTL_CLK                 : out   std_logic;                                  -- I/O Clock.
+        IOCTL_WR                  : out   std_logic;                                  -- Write Enable to FPGA.
+        IOCTL_RD                  : out   std_logic;                                  -- Read Enable from FPGA.
+        IOCTL_SENSE               : in    std_logic;                                  -- Sense to see if HPS accessing ioctl bus.
+        IOCTL_SELECT              : out   std_logic;                                  -- Enable IOP control over ioctl bus.
+        IOCTL_ADDR                : out   std_logic_vector(24 downto 0);              -- Address in FPGA to write into.
+        IOCTL_DOUT                : out   std_logic_vector(31 downto 0);              -- Data to be written into FPGA.
+        IOCTL_DIN                 : in    std_logic_vector(31 downto 0);              -- Data to be read into HPS.
+
+        -- SDRAM signals
+        SDRAM_CLK                 : out   std_logic;                                  -- sdram is accessed at 100MHz
+        SDRAM_CKE                 : out   std_logic;                                  -- clock enable.
+        SDRAM_DQ                  : inout std_logic_vector(15 downto 0);              -- 16 bit bidirectional data bus
+        SDRAM_ADDR                : out   std_logic_vector(12 downto 0);              -- 12 bit multiplexed address bus
+        SDRAM_DQM                 : out   std_logic_vector(1 downto 0);               -- two byte masks
+        SDRAM_BA                  : out   std_logic_vector(1 downto 0);               -- two banks
+        SDRAM_CS_n                : out   std_logic;                                  -- a single chip select
+        SDRAM_WE_n                : out   std_logic;                                  -- write enable
+        SDRAM_RAS_n               : out   std_logic;                                  -- row address select
+        SDRAM_CAS_n               : out   std_logic;                                  -- columns address select
+        SDRAM_READY               : out   std_logic                                   -- sd ready.
+
+        -- DDR2 DRAM
+      --DDR2_ADDR                 : out   std_logic_vector(13 downto 0);              -- 14 bit multiplexed address bus
+      --DDR2_DQ                   : inout std_logic_vector(63 downto 0);              -- 64 bit bidirectional data bus
+      --DDR2_DQS                  : inout std_logic_vector(7 downto 0);               -- 8 bit bidirectional data bus
+      --DDR2_DQM                  : out   std_logic_vector(17 downto 0);               -- eight byte masks
+      --DDR2_ODT                  : out   std_logic_vector(1 downto 0);               -- 14 bit multiplexed address bus
+      --DDR2_BA                   : out   std_logic_vector(2 downto 0);               -- 8 banks 
+      --DDR2_CS                   : out   std_logic_vector(1 downto 0);               -- 2 chip selects.
+      --DDR2_WE                   : out   std_logic;                                  -- write enable
+      --DDR2_RAS                  : out   std_logic;                                  -- row address select
+      --DDR2_CAS                  : out   std_logic;                                  -- columns address select
+      --DDR2_CKE                  : out   std_logic_vector(1 downto 0);               -- 2 clock enable.
+      --DDR2_CLK                  : out   std_logic_vector(1 downto 0)                -- 2 clocks.
+);
 end component;
 
 --component STORM_SoC
 --    port (
 --        -- Global Control --
---        CLK_I                 : in    std_logic;
---        RST_I                 : in    std_logic;
+--        CLK_I                     : in    std_logic;
+--        RST_I                     : in    std_logic;
 --
 --        -- General purpose (debug) UART --
---        UART0_RXD_I           : in    std_logic;
---        UART0_TXD_O           : out   std_logic;
+--        UART0_RXD_I               : in    std_logic;
+--        UART0_TXD_O               : out   std_logic;
 --
 --        -- System Control --
---        START_I               : in    std_logic; -- low active
---        BOOT_CONFIG_I         : in    std_logic_vector(03 downto 0); -- low active
---        LED_BAR_O             : out   std_logic_vector(07 downto 0);
+--        START_I                   : in    std_logic; -- low active
+--        BOOT_CONFIG_I             : in    std_logic_vector(03 downto 0); -- low active
+--        LED_BAR_O                 : out   std_logic_vector(07 downto 0);
 --
 --        -- GP Input Pins --
---        GP_INPUT_I            : in    std_logic_vector(07 downto 0);
+--        GP_INPUT_I                : in    std_logic_vector(07 downto 0);
 --
 --        -- GP Output Pins --
---        GP_OUTPUT_O           : out   std_logic_vector(07 downto 0);
+--        GP_OUTPUT_O               : out   std_logic_vector(07 downto 0);
 --
 --        -- I²C Port --
---        I2C_SCL_IO            : inout std_logic;
---        I2C_SDA_IO            : inout std_logic;
+--        I2C_SCL_IO                : inout std_logic;
+--        I2C_SDA_IO                : inout std_logic;
 --
 --        -- SPI Port 0 [3 devices] --
---        SPI_P0_CLK_O          : out   std_logic;
---        SPI_P0_MISO_I         : in    std_logic;
---        SPI_P0_MOSI_O         : out   std_logic;
---        SPI_P0_CS_O           : out   std_logic_vector(02 downto 0);
+--        SPI_P0_CLK_O              : out   std_logic;
+--        SPI_P0_MISO_I             : in    std_logic;
+--        SPI_P0_MOSI_O             : out   std_logic;
+--        SPI_P0_CS_O               : out   std_logic_vector(02 downto 0);
 --
 --        -- SPI Port 1 [3 devices] --
---        SPI_P1_CLK_O          : out   std_logic;
---        SPI_P1_MISO_I         : in    std_logic;
---        SPI_P1_MOSI_O         : out   std_logic;
---        SPI_P1_CS_O           : out   std_logic_vector(02 downto 0);
+--        SPI_P1_CLK_O              : out   std_logic;
+--        SPI_P1_MISO_I             : in    std_logic;
+--        SPI_P1_MOSI_O             : out   std_logic;
+--        SPI_P1_CS_O               : out   std_logic_vector(02 downto 0);
 --
 --        -- SPI Port 2 [2 devices] --
---        SPI_P2_CLK_O          : out   std_logic;
---        SPI_P2_MISO_I         : in    std_logic;
---        SPI_P2_MOSI_O         : out   std_logic;
---        SPI_P2_CS_O           : out   std_logic_vector(01 downto 0);
+--        SPI_P2_CLK_O              : out   std_logic;
+--        SPI_P2_MISO_I             : in    std_logic;
+--        SPI_P2_MOSI_O             : out   std_logic;
+--        SPI_P2_CS_O               : out   std_logic_vector(01 downto 0);
 --
 --        -- PWM Port 0 --
-----      PWM0_PORT_O           : out   std_logic_vector(07 downto 0)
+----      PWM0_PORT_O               : out   std_logic_vector(07 downto 0)
 --
 --        -- IOCTL Bus --
---        IOCTL_DOWNLOAD        : out   std_logic;                                  -- Downloading to FPGA.
---        IOCTL_UPLOAD          : out   std_logic;                                  -- Uploading from FPGA.
---        IOCTL_CLK             : out   std_logic;                                  -- I/O Clock.
---        IOCTL_WR              : out   std_logic;                                  -- Write Enable to FPGA.
---        IOCTL_RD              : out   std_logic;                                  -- Read Enable from FPGA.
---        IOCTL_SENSE           : in    std_logic;                                  -- Sense to see if HPS accessing ioctl bus.
---        IOCTL_SELECT          : out   std_logic;                                  -- Enable IOP control over ioctl bus.
---        IOCTL_ADDR            : out   std_logic_vector(24 downto 0);              -- Address in FPGA to write into.
---        IOCTL_DOUT            : out   std_logic_vector(31 downto 0);              -- Data to be written into FPGA.
---        IOCTL_DIN             : in    std_logic_vector(31 downto 0)               -- Data to be read into HPS.
+--        IOCTL_DOWNLOAD            : out   std_logic;                                  -- Downloading to FPGA.
+--        IOCTL_UPLOAD              : out   std_logic;                                  -- Uploading from FPGA.
+--        IOCTL_CLK                 : out   std_logic;                                  -- I/O Clock.
+--        IOCTL_WR                  : out   std_logic;                                  -- Write Enable to FPGA.
+--        IOCTL_RD                  : out   std_logic;                                  -- Read Enable from FPGA.
+--        IOCTL_SENSE               : in    std_logic;                                  -- Sense to see if HPS accessing ioctl bus.
+--        IOCTL_SELECT              : out   std_logic;                                  -- Enable IOP control over ioctl bus.
+--        IOCTL_ADDR                : out   std_logic_vector(24 downto 0);              -- Address in FPGA to write into.
+--        IOCTL_DOUT                : out   std_logic_vector(31 downto 0);              -- Data to be written into FPGA.
+--        IOCTL_DIN                 : in    std_logic_vector(31 downto 0)               -- Data to be read into HPS.
 --
 ----      -- SDRAM Interface --
-----      SDRAM_CLK_O           : out   std_logic;
-----      SDRAM_CSN_O           : out   std_logic;
-----      SDRAM_CKE_O           : out   std_logic;
-----      SDRAM_RASN_O          : out   std_logic;
-----      SDRAM_CASN_O          : out   std_logic;
-----      SDRAM_WEN_O           : out   std_logic;
-----      SDRAM_DQM_O           : out   std_logic_vector(01 downto 0);
-----      SDRAM_BA_O            : out   std_logic_vector(01 downto 0);
-----      SDRAM_ADR_O           : out   std_logic_vector(11 downto 0);
-----      SDRAM_DAT_IO          : inout std_logic_vector(15 downto 0)
+----      SDRAM_CLK_O               : out   std_logic;
+----      SDRAM_CSN_O               : out   std_logic;
+----      SDRAM_CKE_O               : out   std_logic;
+----      SDRAM_RASN_O              : out   std_logic;
+----      SDRAM_CASN_O              : out   std_logic;
+----      SDRAM_WEN_O               : out   std_logic;
+----      SDRAM_DQM_O               : out   std_logic_vector(01 downto 0);
+----      SDRAM_BA_O                : out   std_logic_vector(01 downto 0);
+----      SDRAM_ADR_O               : out   std_logic_vector(11 downto 0);
+----      SDRAM_DAT_IO              : inout std_logic_vector(15 downto 0)
 --    );
 --end component;
 --
 --component neo430
 --    generic (
 --        -- general configuration --
---        CLOCK_SPEED           : natural := 100000000; -- main clock in Hz
---        IMEM_SIZE             : natural := 4*1024; -- internal IMEM size in bytes, max 48kB (default=4kB)
---        DMEM_SIZE             : natural := 2*1024; -- internal DMEM size in bytes, max 12kB (default=2kB)
+--        CLOCK_SPEED               : natural := 100000000; -- main clock in Hz
+--        IMEM_SIZE                 : natural := 4*1024; -- internal IMEM size in bytes, max 48kB (default=4kB)
+--        DMEM_SIZE                 : natural := 2*1024; -- internal DMEM size in bytes, max 12kB (default=2kB)
 --        -- additional configuration --
---        USER_CODE             : std_logic_vector(15 downto 0) := x"0000"; -- custom user code
+--        USER_CODE                 : std_logic_vector(15 downto 0) := x"0000"; -- custom user code
 --        -- module configuration --
---        DADD_USE              : boolean := true; -- implement DADD instruction? (default=true)
---        MULDIV_USE            : boolean := true; -- implement multiplier/divider unit? (default=true)
---        WB32_USE              : boolean := false;-- implement WB32 unit? (default=true)
---        WDT_USE               : boolean := true; -- implement WDT? (default=true)
---        GPIO_USE              : boolean := true; -- implement GPIO unit? (default=true)
---        TIMER_USE             : boolean := true; -- implement timer? (default=true)
---        UART_USE              : boolean := true; -- implement UART? (default=true)
---        CRC_USE               : boolean := true; -- implement CRC unit? (default=true)
---        CFU_USE               : boolean := true; -- implement custom functions unit? (default=false)
---        PWM_USE               : boolean := true; -- implement PWM controller?
---        TWI_USE               : boolean := true; -- implement two wire serial interface? (default=true)
---        SPI_USE               : boolean := true; -- implement SPI? (default=true)
+--        DADD_USE                  : boolean := true; -- implement DADD instruction? (default=true)
+--        MULDIV_USE                : boolean := true; -- implement multiplier/divider unit? (default=true)
+--        WB32_USE                  : boolean := false;-- implement WB32 unit? (default=true)
+--        WDT_USE                   : boolean := true; -- implement WDT? (default=true)
+--        GPIO_USE                  : boolean := true; -- implement GPIO unit? (default=true)
+--        TIMER_USE                 : boolean := true; -- implement timer? (default=true)
+--        UART_USE                  : boolean := true; -- implement UART? (default=true)
+--        CRC_USE                   : boolean := true; -- implement CRC unit? (default=true)
+--        CFU_USE                   : boolean := true; -- implement custom functions unit? (default=false)
+--        PWM_USE                   : boolean := true; -- implement PWM controller?
+--        TWI_USE                   : boolean := true; -- implement two wire serial interface? (default=true)
+--        SPI_USE                   : boolean := true; -- implement SPI? (default=true)
 --        -- boot configuration --
---        BOOTLD_USE            : boolean := true; -- implement and use bootloader? (default=true)
---        IMEM_AS_ROM           : boolean := false -- implement IMEM as read-only memory? (default=false)
+--        BOOTLD_USE                : boolean := true; -- implement and use bootloader? (default=true)
+--        IMEM_AS_ROM               : boolean := false -- implement IMEM as read-only memory? (default=false)
 --   );
 --    port (
 --        -- global control --
---        clk_i                 : in    std_logic; -- global clock, rising edge
---        rst_i                 : in    std_logic; -- global reset, async, low-active
+--        clk_i                     : in    std_logic; -- global clock, rising edge
+--        rst_i                     : in    std_logic; -- global reset, async, low-active
 --        -- gpio --
---        gpio_o                : out   std_logic_vector(15 downto 0); -- parallel output
---        gpio_i                : in    std_logic_vector(15 downto 0); -- parallel input
+--        gpio_o                    : out   std_logic_vector(15 downto 0); -- parallel output
+--        gpio_i                    : in    std_logic_vector(15 downto 0); -- parallel input
 --        -- pwm channels --
---        pwm_o                 : out   std_logic_vector(02 downto 0); -- pwm channels
+--        pwm_o                     : out   std_logic_vector(02 downto 0); -- pwm channels
 --        -- serial com --
---        uart_txd_o            : out   std_logic; -- UART send data
---        uart_rxd_i            : in    std_logic; -- UART receive data
---        spi_sclk_o            : out   std_logic; -- serial clock line
---        spi_mosi_o            : out   std_logic; -- serial data line out
---        spi_miso_i            : in    std_logic; -- serial data line in
---        spi_cs_o              : out   std_logic_vector(07 downto 0); -- SPI CS 0..7
---        twi_sda_io            : inout std_logic; -- twi serial data line
---        twi_scl_io            : inout std_logic; -- twi serial clock line
+--        uart_txd_o                : out   std_logic; -- UART send data
+--        uart_rxd_i                : in    std_logic; -- UART receive data
+--        spi_sclk_o                : out   std_logic; -- serial clock line
+--        spi_mosi_o                : out   std_logic; -- serial data line out
+--        spi_miso_i                : in    std_logic; -- serial data line in
+--        spi_cs_o                  : out   std_logic_vector(07 downto 0); -- SPI CS 0..7
+--        twi_sda_io                : inout std_logic; -- twi serial data line
+--        twi_scl_io                : inout std_logic; -- twi serial clock line
 --        -- IOCTL Bus --
---        ioctl_download        : out   std_logic;                                  -- Downloading to FPGA.
---        ioctl_upload          : out   std_logic;                                  -- Uploading from FPGA.
---        ioctl_clk             : out   std_logic;                                  -- I/O Clock.
---        ioctl_wr              : out   std_logic;                                  -- Write Enable to FPGA.
---        ioctl_rd              : out   std_logic;                                  -- Read Enable from FPGA.
---        ioctl_sense           : in    std_logic;                                  -- Sense to see if HPS accessing ioctl bus.
---        ioctl_select          : out   std_logic;                                  -- Enable CFU control over ioctl bus.
---        ioctl_addr            : out   std_logic_vector(24 downto 0);              -- Address in FPGA to write into.
---        ioctl_dout            : out   std_logic_vector(31 downto 0);              -- Data to be written into FPGA.
---        ioctl_din             : in    std_logic_vector(31 downto 0);              -- Data to be read into HPS.
+--        ioctl_download            : out   std_logic;                                  -- Downloading to FPGA.
+--        ioctl_upload              : out   std_logic;                                  -- Uploading from FPGA.
+--        ioctl_clk                 : out   std_logic;                                  -- I/O Clock.
+--        ioctl_wr                  : out   std_logic;                                  -- Write Enable to FPGA.
+--        ioctl_rd                  : out   std_logic;                                  -- Read Enable from FPGA.
+--        ioctl_sense               : in    std_logic;                                  -- Sense to see if HPS accessing ioctl bus.
+--        ioctl_select              : out   std_logic;                                  -- Enable CFU control over ioctl bus.
+--        ioctl_addr                : out   std_logic_vector(24 downto 0);              -- Address in FPGA to write into.
+--        ioctl_dout                : out   std_logic_vector(31 downto 0);              -- Data to be written into FPGA.
+--        ioctl_din                 : in    std_logic_vector(31 downto 0);              -- Data to be read into HPS.
 --        -- 32-bit wishbone interface --
---        wb_adr_o              : out   std_logic_vector(31 downto 0); -- address
---        wb_dat_i              : in    std_logic_vector(31 downto 0); -- read data
---        wb_dat_o              : out   std_logic_vector(31 downto 0); -- write data
---        wb_we_o               : out   std_logic; -- read/write
---        wb_sel_o              : out   std_logic_vector(03 downto 0); -- byte enable
---        wb_stb_o              : out   std_logic; -- strobe
---        wb_cyc_o              : out   std_logic; -- valid cycle
---        wb_ack_i              : in    std_logic; -- transfer acknowledge
+--        wb_adr_o                  : out   std_logic_vector(31 downto 0); -- address
+--        wb_dat_i                  : in    std_logic_vector(31 downto 0); -- read data
+--        wb_dat_o                  : out   std_logic_vector(31 downto 0); -- write data
+--        wb_we_o                   : out   std_logic; -- read/write
+--        wb_sel_o                  : out   std_logic_vector(03 downto 0); -- byte enable
+--        wb_stb_o                  : out   std_logic; -- strobe
+--        wb_cyc_o                  : out   std_logic; -- valid cycle
+--        wb_ack_i                  : in    std_logic; -- transfer acknowledge
 --        -- interrupts --
---        irq_i                 : in    std_logic; -- external interrupt request line
---        irq_ack_o             : out   std_logic  -- external interrupt request acknowledge
+--        irq_i                     : in    std_logic; -- external interrupt request line
+--        irq_ack_o                 : out   std_logic  -- external interrupt request acknowledge
 --    );
 --end component;
 
 begin
+
+    --
+    -- Instantiate a local PLL for the I/O Processor and memory.
+    --
+    IOPCLK : entity work.Clock_50to100
+    port map
+    (
+        inclk0            => CON_CLKMASTER,
+        c0                => CON_CLKIOP,
+        c1                => CON_CLKIOPMEM,
+        locked            => CON_PLL_LOCKED
+    );
 
     --
     -- Instantiation
@@ -326,7 +452,6 @@ begin
             CLKMASTER             => CON_CLKMASTER,                                 -- Master Clock(50MHz)
             CLKSYS                => CON_CLKSYS,                                    -- System clock.
             CLKVID                => CON_CLKVID,                                    -- Pixel base clock of video.
-            CLKIOP                => CON_CLKIOP,                                    -- IO Processor Clock.
             --------------------                                                    ----------------------------
             COLD_RESET            => CON_COLD_RESET,
             WARM_RESET            => CON_WARM_RESET,
@@ -355,6 +480,94 @@ begin
             IOCTL_DOUT            => CON_IOCTL_DOUT,                                -- Data to be written into FPGA.
             IOCTL_DIN             => CON_IOCTL_DIN                                  -- Data to be read into HPS.
     );
+
+
+    -- If enabled, instantiate the local ZPU IO processor to provide IO and user interface services.
+    --
+    ZPU_ENABLED: if ZPU_ENABLE = 1 generate
+        ZPU_0: zpu_soc
+          generic map (
+            SYSCLK_FREQUENCY      => SYSCLK_DE10_MISTER_FREQ
+          )        
+          port map (
+            -- Global Control --
+            SYSCLK                => CON_CLKIOP,                                    -- System clock, running at frequency indicated in SYSCLK_FREQUENCY
+            MEMCLK                => CON_CLKIOPMEM,                                 -- Memory clock, running at twice frequency indicated in SYSCLK_FREQUENCY
+            RESET_IN              => (not CON_COLD_RESET and not CON_WARM_RESET) and CON_PLL_LOCKED,
+      
+            -- UART 0 & 1
+            UART_RX_0             => CON_UART_RX_0,
+            UART_TX_0             => CON_UART_TX_0,
+            UART_RX_1             => CON_UART_RX_1,
+            UART_TX_1             => CON_UART_TX_1,
+      
+            -- SPI signals
+            SPI_MISO              => '0',                                           -- Allow the SPI interface not to be plumbed in.
+            SPI_MOSI              => open, 
+            SPI_CLK               => open, 
+            SPI_CS                => open, 
+      
+            -- SD Card (SPI) signals
+            SDCARD_MISO           => CON_SPI_MISO,
+            SDCARD_MOSI           => CON_SPI_MOSI,
+            SDCARD_CLK            => CON_SPI_SCLK,
+            SDCARD_CS             => CON_SPI_CS,
+            
+            -- PS/2 signals
+            PS2K_CLK_IN           => '1', 
+            PS2K_DAT_IN           => '1',
+            PS2K_CLK_OUT          => open,
+            PS2K_DAT_OUT          => open,
+            PS2M_CLK_IN           => '1',
+            PS2M_DAT_IN           => '1',
+            PS2M_CLK_OUT          => open,
+            PS2M_DAT_OUT          => open,
+      
+            -- I²C signals
+            I2C_SCL_IO            => open,
+            I2C_SDA_IO            => open,
+      
+            -- IOCTL Bus
+            IOCTL_DOWNLOAD        => IOP_IOCTL_DOWNLOAD,                            -- Downloading to FPGA.
+            IOCTL_UPLOAD          => IOP_IOCTL_UPLOAD,                              -- Uploading from FPGA.
+            IOCTL_CLK             => IOP_IOCTL_CLK,                                 -- I/O Clock.
+            IOCTL_WR              => IOP_IOCTL_WR,                                  -- Write Enable to FPGA.
+            IOCTL_RD              => IOP_IOCTL_RD,                                  -- Read Enable from FPGA.
+            IOCTL_SENSE           => IOP_IOCTL_SENSE,                               -- Sense to see if HPS accessing ioctl bus.
+            IOCTL_SELECT          => IOP_IOCTL_SELECT,                              -- Enable IOP control over ioctl bus.
+            IOCTL_ADDR            => IOP_IOCTL_ADDR,                                -- Address in FPGA to write into.
+            IOCTL_DOUT            => IOP_IOCTL_DOUT,                                -- Data to be written into FPGA.
+            IOCTL_DIN             => IOP_IOCTL_DIN,                                 -- Data to be read into HPS.
+      
+            -- SDRAM signals
+            SDRAM_CLK             => sdram_clk,                                     -- sdram is accessed at 100MHz
+            SDRAM_CKE             => sdram_cke,                                     -- clock enable.
+            SDRAM_DQ              => sdram_dq,                                      -- 16 bit bidirectional data bus
+            SDRAM_ADDR            => sdram_addr,                                    -- 12 bit multiplexed address bus
+            SDRAM_DQM             => CON_SDRAM_DQM,                                 -- two byte masks
+            SDRAM_BA              => sdram_ba,                                      -- two banks
+            SDRAM_CS_n            => sdram_cs_n,                                    -- a single chip select
+            SDRAM_WE_n            => sdram_we_n,                                    -- write enable
+            SDRAM_RAS_n           => sdram_ras_n,                                   -- row address select
+            SDRAM_CAS_n           => sdram_cas_n,                                   -- columns address select
+            SDRAM_READY           => open                                           -- sd ready.
+
+            -- DDR2 DRAM
+          --DDR2_ADDR             => open,                                          -- 14 bit multiplexed address bus
+          --DDR2_DQ               => open,                                          -- 64 bit bidirectional data bus
+          --DDR2_DQS              => open,                                          -- 8 bit bidirectional data bus
+          --DDR2_DQM              => open,                                          -- eight byte masks
+          --DDR2_ODT              => open,                                          -- 14 bit multiplexed address bus
+          --DDR2_BA               => open,                                          -- 8 banks 
+          --DDR2_CS               => open,                                          -- 2 chip selects.
+          --DDR2_WE               => open,                                          -- write enable
+          --DDR2_RAS              => open,                                          -- row address select
+          --DDR2_CAS              => open,                                          -- columns address select
+          --DDR2_CKE              => open,                                          -- 2 clock enable.
+          --DDR2_CLK              => open                                           -- 2 clocks.
+        );
+    end generate;
+
 
 --    -- If enabled, instantiate the local STORM IO processor to provide IO and user interface services.
 --    --
@@ -505,7 +718,7 @@ begin
 
 --    -- If the IO Processor is disabled, set the signals to inactive.
 --    --
---    IOP_DISABLED: if NEO_ENABLE = 0 and STORM_ENABLE = 0 generate
+    IOP_DISABLED: if ZPU_ENABLE = 0 and NEO_ENABLE = 0 and STORM_ENABLE = 0 generate
         IOP_IOCTL_DOWNLOAD        <= '0';
         IOP_IOCTL_UPLOAD          <= '0';
         IOP_IOCTL_CLK             <= '0';
@@ -516,7 +729,7 @@ begin
         --IOP_IOCTL_DIN           => open;
         --IOP_IOCTL_SENSE         => open;
         IOP_IOCTL_SELECT          <= '0';
---    end generate;
+    end generate;
 
     -- Assign signals from the emu onto local wires.
     --
@@ -536,14 +749,21 @@ begin
     vga_b_o                       <= CON_VGA_B_O;
     audio_l_o                     <= CON_AUDIO_L_O;
     audio_r_o                     <= CON_AUDIO_R_O;
-
-    uart_tx                       <= CON_UART_TX;
-    CON_UART_RX                   <= uart_rx;
-    sd_sck                        <= CON_SPI_SCLK;
-    sd_mosi                       <= CON_SPI_MOSI;
-    CON_SPI_MISO                  <= sd_miso;
-    sd_cs                         <= CON_SPI_CS(0);
     --
+    sdram_dqmh                    <= CON_SDRAM_DQM(1);       
+    sdram_dqml                    <= CON_SDRAM_DQM(0);
+                        
+    uart_tx_0                     <= CON_UART_TX_0;
+    CON_UART_RX_0                 <= uart_rx_0;
+    uart_tx_1                     <= CON_UART_TX_1;
+    CON_UART_RX_1                 <= uart_rx_1;
+
+    sd_sck                        <= CON_SPI_SCLK(0);
+    sd_mosi                       <= CON_SPI_MOSI(0);
+    CON_SPI_MISO(0)               <= sd_miso;
+    sd_cs                         <= CON_SPI_CS(0);
+    CON_SPI_MISO(SOC_SD_DEVICES-1 downto 1) <= (others => '1');
+
     -- Multiplexer, default IO control to the HPS unless the IOP is enabled and selects. 
     -- The IOP first senses to ensure there is no activity on the bus, then takes control
     --

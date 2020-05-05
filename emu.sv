@@ -97,23 +97,26 @@ module emu
     output        DDRAM_WE,
 
     //SDRAM interface with lower latency
-//  ,output        SDRAM_CLK,
-//  output        SDRAM_CKE,
-//  output [12:0] SDRAM_A,
-//  output  [1:0] SDRAM_BA,
-//  inout  [15:0] SDRAM_DQ,
-//  output        SDRAM_DQML,
-//  output        SDRAM_DQMH,
-//  output        SDRAM_nCS,
-//  output        SDRAM_nCAS,
-//  output        SDRAM_nRAS,
-//  output        SDRAM_nWE
-    input         UART_RX,
-    output        UART_TX
+    output        SDRAM_CLK,
+    output        SDRAM_CKE,
+    output [12:0] SDRAM_A,
+    output  [1:0] SDRAM_BA,
+    inout  [15:0] SDRAM_DQ,
+    output        SDRAM_DQML,
+    output        SDRAM_DQMH,
+    output        SDRAM_nCS,
+    output        SDRAM_nCAS,
+    output        SDRAM_nRAS,
+    output        SDRAM_nWE,
+
+    input         UART_RX_0,
+    output        UART_TX_0,
+    input         UART_RX_1,
+    output        UART_TX_1
 );
 
 //assign {SD_SCK, SD_MOSI, SD_CS} = 'Z;
-//assign {SDRAM_DQ, SDRAM_A, SDRAM_BA, SDRAM_CLK, SDRAM_CKE, SDRAM_DQML, SDRAM_DQMH, SDRAM_nWE, SDRAM_nCAS, SDRAM_nRAS, SDRAM_nCS} = 'Z;
+//assign {DRAM_DQ, SDRAM_A, SDRAM_BA, SDRAM_CLK, SDRAM_CKE, SDRAM_DQML, SDRAM_DQMH, SDRAM_nWE, SDRAM_nCAS, SDRAM_nRAS, SDRAM_nCS} = 'Z;
 assign {DDRAM_CLK, DDRAM_BURSTCNT, DDRAM_ADDR, DDRAM_DIN, DDRAM_BE, DDRAM_RD, DDRAM_WE} = 0;
  
 assign LED_USER  = ioctl_download;
@@ -275,13 +278,31 @@ bridge sharp_mz
         .audio_l_o(audio_l_emu),
         .audio_r_o(audio_r_emu),
 
-        .uart_rx(UART_RX),
-        .uart_tx(UART_TX),
+        // ZPU UART for Console and Debug channels.
+        .uart_rx_0(UART_RX_0),
+        .uart_tx_0(UART_TX_0),
+        .uart_rx_1(UART_RX_1),
+        .uart_tx_1(UART_TX_1),
+
+        // SD Card on daughter board.
         .sd_sck(SD_SCK),
         .sd_mosi(SD_MOSI),
         .sd_miso(SD_MISO),
         .sd_cs(SD_CS),
         .sd_cd(SD_CD),
+
+        // SDRAM
+        .sdram_clk(SDRAM_CLK),
+        .sdram_cke(SDRAM_CKE),
+        .sdram_addr(SDRAM_A[12:0]),
+        .sdram_ba(SDRAM_BA),
+        .sdram_dq(SDRAM_DQ),
+        .sdram_dqml(SDRAM_DQML),
+        .sdram_dqmh(SDRAM_DQMH),
+        .sdram_cs_n(SDRAM_nCS),
+        .sdram_cas_n(SDRAM_nCAS),
+        .sdram_ras_n(SDRAM_nRAS),
+        .sdram_we_n(SDRAM_nWE),
 
         // HPS Interface
         .ioctl_download(ioctl_download),                                        // HPS Downloading to FPGA.

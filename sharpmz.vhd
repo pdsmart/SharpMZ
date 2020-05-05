@@ -83,7 +83,6 @@ entity sharpmz is
         CLKMASTER             : in     std_logic;                               -- Master Clock(50MHz)
         CLKSYS                : out    std_logic;                               -- System clock.
         CLKVID                : out    std_logic;                               -- Pixel base clock of video.
-        CLKIOP                : out    std_logic;                               -- IO Processor Clock.
         --------------------                Reset                               ----------------------------
         COLD_RESET            : in     std_logic;
         WARM_RESET            : in     std_logic;
@@ -1090,7 +1089,6 @@ begin
     --
     CLKSYS                   <= CLKBUS(CKMASTER);                       -- HPS clock.
     CLKVID                   <= CLKBUS(CKVIDEO);                        -- Video pixel clock output.
-    CLKIOP                   <= CLKBUS(CKIOP);                          -- IO Processor Clock.
 
     -- Multiplexer -> Signals to enabled hardware.
     --

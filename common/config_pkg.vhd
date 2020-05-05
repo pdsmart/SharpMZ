@@ -9,6 +9,12 @@
 -- Copyright:       (c) 2018 Philip Smart <philip.smart@net2net.org>
 --
 -- History:         September 2018   - Initial module written.
+--                  April 2020       - Started to blend in ZPU developments after giving up on the
+--                                     STORM processor (very nice but I hit a cache bug and it wasnt a
+--                                     quick fix, the STORM is no longer maintained). I moved onto the
+--                                     Neo430 from the same designer which is very nice but a little
+--                                     underpowered for what I need in this emulator, hence settling on 
+--                                     my own version of the ZPU which I can customise as necessary.
 --
 ---------------------------------------------------------------------------------------------------------
 -- This source file is free software: you can redistribute it and-or modify
@@ -28,6 +34,7 @@
 package config_pkg is
 
     constant DEBUG_ENABLE           : integer := 1;                      -- Enable debug logic,
+    constant ZPU_ENABLE             : integer := 1;                      -- Enable local ZPU IO processor,
     constant NEO_ENABLE             : integer := 0;                      -- Enable local NEO430 IO processor,
     constant STORM_ENABLE           : integer := 0;                      -- Enable local STORM IO processor,
 

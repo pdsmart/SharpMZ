@@ -56,7 +56,7 @@ package clkgen_pkg is
 
     -- Clock bus, various clocks on a single bus construct.
     --
-    subtype  CLKBUS_WIDTH is integer range 8 downto 0;
+    subtype  CLKBUS_WIDTH is integer range 7 downto 0;
 
     -- Indexes to the various clocks on the bus.
     --
@@ -65,10 +65,9 @@ package clkgen_pkg is
     constant CKRTC                  : integer := 2;                      -- RTC clock.
     constant CKENVIDEO              : integer := 3;                      -- Video clock enable.
     constant CKVIDEO                : integer := 4;                      -- Video clock.
-    constant CKIOP                  : integer := 5;
-    constant CKENCPU                : integer := 6;                      -- CPU clock enable.
-    constant CKENLEDS               : integer := 7;                      -- LEDS display clock enable.
-    constant CKENPERIPH             : integer := 8;                      -- Peripheral clock enable.
+    constant CKENCPU                : integer := 5;                      -- CPU clock enable.
+    constant CKENLEDS               : integer := 6;                      -- LEDS display clock enable.
+    constant CKENPERIPH             : integer := 7;                      -- Peripheral clock enable.
 end clkgen_pkg;
 
 library IEEE;
@@ -143,7 +142,6 @@ signal CK0_1i                      : std_logic;                          -- 0.1H
 signal CKSOUNDi                    : std_logic;                          -- Sound clock 50/50 Duty cycle.
 signal CKRTCi                      : std_logic;                          -- RTC clock 50/50 Duty cycle.
 signal CKVIDEOi                    : std_logic;                          -- Video clock 50/50 Duty cycle.
-signal CKIOPi                      : std_logic;                          -- IO Processor clock.
 --
 -- Enable signals for target clocks.
 --
@@ -212,7 +210,7 @@ begin
             outclk_0               => CK448Mi,                           -- 448MHz
             outclk_1               => CK112Mi,                           -- 112MHz
             outclk_2               => CK64Mi,                            -- 64MHz
-            outclk_3               => CK32Mi,                            -- 328MHz
+            outclk_3               => CK32Mi,                            -- 32MHz
             outclk_4               => CK16Mi,                            -- 16MHz
             outclk_5               => CK8Mi,                             -- 8MHz
             outclk_6               => CK4Mi,                             -- 4MHz
@@ -789,6 +787,5 @@ begin
     CLKBUS(CKENCPU)                <= CKENCPUi;                          -- Enable signal for CPU base clock.
     CLKBUS(CKENLEDS)               <= CKENLEDSi;                         -- Enable signal for LEDS base clock.
     CLKBUS(CKENPERIPH)             <= CKENPERi;                          -- Enable signal for Peripheral base clock.
-    CLKBUS(CKIOP)                  <= CK64Mi;
 
 end RTL;

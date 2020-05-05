@@ -59,7 +59,7 @@ module sys_top
 `endif
 
     //////////// SDR ///////////
-`ifndef LITE
+//`ifndef LITE
     output [12:0] SDRAM_A,
     inout  [15:0] SDRAM_DQ,
     output        SDRAM_DQML,
@@ -71,15 +71,17 @@ module sys_top
     output  [1:0] SDRAM_BA,
     output        SDRAM_CLK,
     output        SDRAM_CKE,
-`else
-    input         UART_RX,
-    output        UART_TX,
-`endif
+//`else
+    input         UART_RX_0,
+    output        UART_TX_0,
+    input         UART_RX_1,
+    output        UART_TX_1,
+//`endif
 
     //////////// I/O ///////////
-    output        LED_USER,
-    output        LED_HDD,
-    output        LED_POWER,
+//    output        LED_USER,
+//    output        LED_HDD,
+//    output        LED_POWER,
     input         BTN_USER,
     input         BTN_OSD,
     input         BTN_RESET,
@@ -115,9 +117,9 @@ wire led_u = ~led_user;
 wire [7:0] led_mb;
 
 assign LED       = led_mb;
-assign LED_POWER = led_p ? 1'bZ : 1'b0;
-assign LED_HDD   = led_d ? 1'bZ : 1'b0;
-assign LED_USER  = led_u ? 1'bZ : 1'b0;
+//assign LED_POWER = led_p ? 1'bZ : 1'b0;
+//assign LED_HDD   = led_d ? 1'bZ : 1'b0;
+//assign LED_USER  = led_u ? 1'bZ : 1'b0;
 
 //LEDs on main board
 //assign LED = (led_overtake & led_state) | (~led_overtake & {3'b000, ~led_p, 1'b0, ~led_d, 1'b0, ~led_u});
@@ -940,8 +942,6 @@ emu emu
         .SD_CS(SDIO_DAT[3]),
         .SD_CD(VGA_EN ? VGA_HS : SDIO_CD),
 
-        
-
         .DDRAM_CLK(ram_clk),
         .DDRAM_ADDR(ram_address),
         .DDRAM_BURSTCNT(ram_burstcount),
@@ -953,7 +953,7 @@ emu emu
         .DDRAM_BE(ram_byteenable),
         .DDRAM_WE(ram_write)
 
-`ifndef LITE
+//`ifndef LITE
         ,
         .SDRAM_DQ(SDRAM_DQ),
         .SDRAM_A(SDRAM_A),
@@ -965,11 +965,13 @@ emu emu
         .SDRAM_nRAS(SDRAM_nRAS),
         .SDRAM_nCAS(SDRAM_nCAS),
         .SDRAM_CLK(SDRAM_CLK),
-        .SDRAM_CKE(SDRAM_CKE)
-`else
-        ,.UART_RX(UART_RX),
-        .UART_TX(UART_TX)
-`endif
+        .SDRAM_CKE(SDRAM_CKE),
+//`else
+        .UART_RX_0(UART_RX_0),
+        .UART_TX_0(UART_TX_0),
+        .UART_RX_1(UART_RX_1),
+        .UART_TX_1(UART_TX_1)
+//`endif
     );
 
     endmodule

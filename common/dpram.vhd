@@ -6,7 +6,8 @@
 -- Description:     Dual Port RAM as provided by Altera in the Megafunctions suite.
 --
 -- Credits:         
--- Copyright:       (c) 2018 Philip Smart <philip.smart@net2net.org>
+-- Copyright:       (c) Altera/Intel
+--                  (c) 2018 Philip Smart <philip.smart@net2net.org>
 --
 -- History:         July 2018   - Initial module written.
 --
