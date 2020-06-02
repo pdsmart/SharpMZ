@@ -57,8 +57,8 @@ package zpu_soc_pkg is
     constant ZPU_SMALL                :     integer    := 0;                                                -- Use the SMALL CPU.
     constant ZPU_MEDIUM               :     integer    := 0;                                                -- Use the MEDIUM CPU.
     constant ZPU_FLEX                 :     integer    := 0;                                                -- Use the FLEX CPU.
-    constant ZPU_EVO                  :     integer    := 0;                                                -- Use the EVOLUTION CPU.
-    constant ZPU_EVO_MINIMAL          :     integer    := 1;                                                -- Use the Minimalist EVOLUTION CPU.
+    constant ZPU_EVO                  :     integer    := 1;                                                -- Use the EVOLUTION CPU.
+    constant ZPU_EVO_MINIMAL          :     integer    := 0;                                                -- Use the Minimalist EVOLUTION CPU.
 
     -- Target board declaration.
     --
@@ -202,8 +202,8 @@ package zpu_soc_pkg is
     -- Optional Evo Minimal CPU hardware features to be implemented.
     constant IMPL_EVOM_OPTIMIZE_IM    :     boolean    := true;                                             -- If the instruction cache is enabled, optimise Im instructions to gain speed.
     -- Optional Evo Minimal CPU instructions to be implemented in hardware:
-    constant IMPL_EVOM_ASHIFTLEFT     :     boolean    := false;                                             -- Arithmetic Shift Left (uses same logic so normally combined with ASHIFTRIGHT and LSHIFTRIGHT).
-    constant IMPL_EVOM_ASHIFTRIGHT    :     boolean    := false;                                             -- Arithmetic Shift Right.
+    constant IMPL_EVOM_ASHIFTLEFT     :     boolean    := false;                                            -- Arithmetic Shift Left (uses same logic so normally combined with ASHIFTRIGHT and LSHIFTRIGHT).
+    constant IMPL_EVOM_ASHIFTRIGHT    :     boolean    := false;                                            -- Arithmetic Shift Right.
     constant IMPL_EVOM_CALL           :     boolean    := false;                                            -- Call to direct address.
     constant IMPL_EVOM_CALLPCREL      :     boolean    := false;                                            -- Call to indirect address (add offset to program counter).
     constant IMPL_EVOM_DIV            :     boolean    := false;                                            -- 32bit signed division.
@@ -212,17 +212,17 @@ package zpu_soc_pkg is
     constant IMPL_EVOM_FIADD32        :     boolean    := false;                                            -- Fixed point Q17.15 addition.
     constant IMPL_EVOM_FIDIV32        :     boolean    := false;                                            -- Fixed point Q17.15 division.
     constant IMPL_EVOM_FIMULT32       :     boolean    := false;                                            -- Fixed point Q17.15 multiplication.
-    constant IMPL_EVOM_LOADB          :     boolean    := true;                                            -- Load single byte from memory.
-    constant IMPL_EVOM_LOADH          :     boolean    := true;                                            -- Load half word (16bit) from memory.
-    constant IMPL_EVOM_LSHIFTRIGHT    :     boolean    := false;                                             -- Logical shift right.
+    constant IMPL_EVOM_LOADB          :     boolean    := true;                                             -- Load single byte from memory.
+    constant IMPL_EVOM_LOADH          :     boolean    := true;                                             -- Load half word (16bit) from memory.
+    constant IMPL_EVOM_LSHIFTRIGHT    :     boolean    := false;                                            -- Logical shift right.
     constant IMPL_EVOM_MOD            :     boolean    := false;                                            -- 32bit modulo (remainder after division).
     constant IMPL_EVOM_MULT           :     boolean    := false;                                            -- 32bit signed multiplication.
     constant IMPL_EVOM_NEG            :     boolean    := false;                                            -- Negate value in TOS.
     constant IMPL_EVOM_NEQ            :     boolean    := false;                                            -- Not equal test.
     constant IMPL_EVOM_POPPCREL       :     boolean    := false;                                            -- Pop a value into the Program Counter from a location relative to the Stack Pointer.
     constant IMPL_EVOM_PUSHSPADD      :     boolean    := false;                                            -- Add a value to the Stack pointer and push it onto the stack.
-    constant IMPL_EVOM_STOREB         :     boolean    := true;                                            -- Store/Write a single byte to memory/IO.
-    constant IMPL_EVOM_STOREH         :     boolean    := true;                                            -- Store/Write a half word (16bit) to memory/IO.
+    constant IMPL_EVOM_STOREB         :     boolean    := true;                                             -- Store/Write a single byte to memory/IO.
+    constant IMPL_EVOM_STOREH         :     boolean    := true;                                             -- Store/Write a half word (16bit) to memory/IO.
     constant IMPL_EVOM_SUB            :     boolean    := false;                                            -- 32bit signed subtract.
     constant IMPL_EVOM_XOR            :     boolean    := false;                                            -- Exclusive or of value in TOS.
 

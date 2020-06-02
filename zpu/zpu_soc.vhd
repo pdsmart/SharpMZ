@@ -2043,7 +2043,7 @@ begin
         ------------------------
         if RESET_IN='0' then
             RESET_COUNTER                                           <= X"FFFF";
-            RESET_COUNTER_RX                                        <= to_unsigned(((SYSCLK_FREQUENCY)/300), 16);
+            RESET_COUNTER_RX                                        <= to_unsigned(((SYSCLK_FREQUENCY)/200), 16);
             RESET_n                                                 <= '0';
 
         -----------------------
@@ -2051,7 +2051,7 @@ begin
         -----------------------                
         elsif rising_edge(SYSCLK) then
 
-    MEM_READ_ENABLE_LAST      <= MEM_READ_ENABLE;
+            MEM_READ_ENABLE_LAST      <= MEM_READ_ENABLE;
 
             -- If the RX receives a break signal, count down to ensure it is held low for correct period, when the count reaches
             -- zero, start a reset.
@@ -2059,12 +2059,12 @@ begin
             if UART_RX_0 = '0' or UART_RX_1 = '0' then
                 RESET_COUNTER_RX                                    <= RESET_COUNTER_RX - 1;
             else
-                RESET_COUNTER_RX                                    <= to_unsigned(((SYSCLK_FREQUENCY)/300), 16);
+                RESET_COUNTER_RX                                    <= to_unsigned(((SYSCLK_FREQUENCY)/200), 16);
             end if;
 
             if RESET_COUNTER_RX = X"0000" then
                 RESET_COUNTER                                       <= X"FFFF";
-                RESET_COUNTER_RX                                    <= to_unsigned(((SYSCLK_FREQUENCY)/300), 16);
+                RESET_COUNTER_RX                                    <= to_unsigned(((SYSCLK_FREQUENCY)/200), 16);
                 RESET_n                                             <= '0';
             end if;
 
