@@ -83,3 +83,12 @@ software/asm/*.obj
 db/
 incremental_db/
 vip.sopcinfo
+jtag.cdf
+output_files/
+zpu/build/
+zpu/cpu/zpu_core_evo.vhd..2
+zpu/cpu/zpu_core_evo.vhd.1
+zpu/cpu/zpu_core_evo.vhd.bakPreMultChange
+zpu/devices/WishBone/
+zpu/devices/sysbus/SDRAM.bak/
+

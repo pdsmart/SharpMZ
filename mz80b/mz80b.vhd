@@ -615,14 +615,11 @@ begin
             
             if CLKBUS(CKENCPU) = '1' then
 
+                -- Only a boot reset or BST_n can set the BOOTSTRAP signal. A system reset just
+                -- resets the cpu and peripherals.
+                --
                 if CONFIG(BOOT_RESET) = '1' or BST_n = '0' then
-                    -- Only a boot reset or BST_n can set the BOOTSTRAP signal. A system reset just
-                    -- resets the cpu and peripherals.
-                    --
-                    if CONFIG(BOOT_RESET) = '1' or BST_n = '0' then
-                        BOOTSTRAP_n <= '0'; 
-                    end if;
-    
+                    BOOTSTRAP_n <= '0'; 
                 else 
                     -- If the NST signal goes high, then reset the BOOTSTRAP signal. This signal can only be set
                     -- by a reset action.
