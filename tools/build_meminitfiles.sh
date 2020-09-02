@@ -99,3 +99,15 @@ ${ROMTOOL} --command=CGROM                                  \
            --20_cgrom=${ROMDIR}/MZFONT.rom                  \
            --binout=${ROMDIR}/combined_cgrom.rom            \
            --mifout=${MIFDIR}/combined_cgrom.mif
+
+${ROMTOOL} --command=CGROM                                  \
+           --a_cgrom=${ROMDIR}/mz-80acg.rom                 \
+           --b_cgrom=${ROMDIR}/mz-80acg.rom                 \
+           --c_cgrom=${ROMDIR}/mz-80acg.rom                 \
+           --k_cgrom=${ROMDIR}/mz-80acg.rom                 \
+           --7_cgrom=${ROMDIR}/mz-80acg.rom                 \
+           --8_cgrom=${ROMDIR}/mz-80acg.rom                 \
+           --12_cgrom=${ROMDIR}/mz-80acg.rom                \
+           --20_cgrom=${ROMDIR}/mz-80acg.rom                \
+           --binout=${ROMDIR}/combined_cgrom.rom            \
+           --mifout=${MIFDIR}/mz80a_cgrom.mif
